@@ -1,8 +1,8 @@
-import { Suspense } from 'react';
-import type { Metadata } from 'next';
-import { MOCK_NEARBY_RESTAURANTS, MOCK_WEATHER_CONDITIONS } from '@/lib/mockData';
-import type { RecommendedRestaurant } from '@/lib/types';
 import ResultsList from '@/components/results/ResultsList';
+import { MOCK_WEATHER_CONDITIONS } from '@/lib/mockData';
+import type { RecommendedRestaurant } from '@/lib/types';
+import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import LoadingResults from './loading'; // Ensure this component exists
 
 export async function generateMetadata({ searchParams }: { searchParams: { preference?: string } }): Promise<Metadata> {
@@ -19,24 +19,50 @@ interface ResultsPageProps {
   };
 }
 
+// Helper to fetch restaurants filtered by preference from backend
+async function fetchRestaurants(preference: string): Promise<RecommendedRestaurant[]> {
+  // const apiUrl = process.env.API_URL || 'http://localhost:3001'; // adjust as needed
+  const apiUrl = 'http://localhost:3001'; // adjust as needed
+  // Add filter param only if preference exists and is not 'Any Cuisine'
+  const query = preference && preference !== 'Any Cuisine' ? `?cuisine=${encodeURIComponent(preference.toLowerCase())}` : '';
+  const res = await fetch(`${apiUrl}/api/restaurants${query}`, { cache: 'no-store' }); // no-store to avoid caching in dev
+  if (!res.ok) {
+    throw new Error('Failed to fetch restaurants');
+  }
+  const data = await res.json();
+  console.log(`Fetched restaurants for preference "${preference}":`, data); // Debug log
+  return data;
+}
+
 export default async function ResultsPage({ searchParams }: ResultsPageProps) {
   const preference = searchParams.preference || 'Any Cuisine'; // Default to 'Any Cuisine' if not specified
   
   // Simulate picking a random weather condition
   const mockWeather = MOCK_WEATHER_CONDITIONS[Math.floor(Math.random() * MOCK_WEATHER_CONDITIONS.length)]; // Keep for display
-  const augmentedRecommendations: RecommendedRestaurant[] = MOCK_NEARBY_RESTAURANTS.map(rec => ({
-    ...rec,
-    type: rec.type || preference,
-    address: rec.address,
-    imageUrl: rec.imageUrl,
-    hint: rec.hint,
-    score: rec.score !== undefined ? rec.score : 0,
-  }));
+  
+  let restaurants: RecommendedRestaurant[] = [];
+  try {
+    restaurants = await fetchRestaurants(preference);
+  } catch (error) {
+    console.error('Error fetching restaurants:', error);
+  };
+
+  restaurants = restaurants.map(restaurant => {
+    return {
+      ...restaurant,
+      type: restaurant.type || preference,
+      address: restaurant.address || 'Unknown Address',
+      imageUrl: restaurant.imageUrl || '/placeholder.jpg', // Use a placeholder image if none exists
+      hint: restaurant.hint || 'No additional information available',
+      score: restaurant.score !== undefined ? restaurant.score : 0, // Default score to 0 if not provided
+    };
+  }
+  )
 
   return (
     <Suspense fallback={<LoadingResults />}>
       <ResultsList
-        restaurants={augmentedRecommendations}
+        restaurants={restaurants}
         weather={mockWeather}
         preference={preference}
       />
