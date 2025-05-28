@@ -54,7 +54,7 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
       ...restaurant,
       type: restaurant.type || preference,
       address: restaurant.address || 'Unknown Address',
-      imageUrl: restaurant.imageUrl || '/placeholder.jpg', // Use a placeholder image if none exists
+      image_url: restaurant.imageUrl || "https://placehold.co/600x400.png", // Use a placeholder image if none exists
       hint: restaurant.hint || 'No additional information available',
       score: restaurant.score !== undefined ? restaurant.score : 0, // Default score to 0 if not provided
     };

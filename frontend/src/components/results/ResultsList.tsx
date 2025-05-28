@@ -22,7 +22,7 @@ const ResultsList = ({ restaurants, weather, preference }: ResultsListProps) => 
     );
   }
 
-  // Sort by score, highest first (AI flow should already do this, but as a safeguard)
+  // Sort by score, highest first
   const sortedRestaurants = [...restaurants].sort((a, b) => b.score - a.score);
   const topPicksCount = Math.min(2, sortedRestaurants.length); // Emphasize top 1 or 2
 

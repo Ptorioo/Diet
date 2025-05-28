@@ -70,6 +70,7 @@ export default function SelectPreferencesPage() {
               strokeDashoffset={offset}
               strokeLinecap="round"
               transform={`rotate(-90 ${radius} ${radius})`}
+              style={{ transition: 'stroke-dashoffset 0.5s cubic-bezier(0.4,0,0.2,1)' }}
             />
             <text x={radius} y={radius} textAnchor="middle" dominantBaseline="central" fontSize="20" fill="#333">{timer}</text>
           </svg>

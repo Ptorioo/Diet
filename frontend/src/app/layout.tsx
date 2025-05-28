@@ -9,9 +9,9 @@ import { cn } from '@/lib/utils';
 export const metadata: Metadata = {
   title: 'Diet - Find Your Next Meal',
   description: 'Intelligent restaurant recommendations tailored to your cravings and the weather.',
-  manifest: '/manifest.json', // Assuming PWA manifest might be added later
+  manifest: '/manifest.json',
   icons: {
-    apple: '/apple-icon.png', // Assuming PWA icons might be added later
+    apple: '/apple-icon.png',
   },
 };
 

@@ -36,8 +36,8 @@ const RestaurantCard = ({ restaurant, isTopPick, weather }: RestaurantCardProps)
         <Image
           src={restaurant.imageUrl || `https://placehold.co/600x400.png`}
           alt={restaurant.name}
-          layout="fill"
-          objectFit="cover"
+          fill
+          className="object-cover"
           data-ai-hint={restaurant.hint || "restaurant food"}
         />
         {isTopPick && (
