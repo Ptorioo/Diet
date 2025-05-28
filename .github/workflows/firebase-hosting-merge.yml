@@ -17,3 +17,4 @@ jobs:
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_EATERYAI_W1Z8W }}
           channelId: live
           projectId: eateryai-w1z8w
+          entryPoint: frontend
