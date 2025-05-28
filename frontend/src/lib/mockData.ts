@@ -46,10 +46,3 @@ export const MOCK_WEATHER_CONDITIONS: string[] = [
   "Hot and humid",
   "Light drizzle",
 ];
-
-export const mockDietaryRestrictions = [
-  { value: 'vegetarian', label: 'Vegetarian' },
-  { value: 'vegan', label: 'Vegan' },
-  { value: 'gluten-free', label: 'Gluten-Free' },
-  { value: 'ketogenic', label: 'Ketogenic' },
-];

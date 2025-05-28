@@ -40,8 +40,13 @@ const PreferenceCard = ({
   );
 };
 
-const PreferenceSelector = () => {
-  const [selectedPreferenceId, setSelectedPreferenceId] = useState<string | null>(null);
+const PreferenceSelector = ({
+  selectedPreferenceId,
+  setSelectedPreferenceId,
+}: {
+  selectedPreferenceId: string | null;
+  setSelectedPreferenceId: (id: string) => void;
+}) => {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
@@ -56,7 +61,6 @@ const PreferenceSelector = () => {
       if (selectedPreference) {
         router.push(`/results?preference=${encodeURIComponent(selectedPreference.name)}`);
       } else {
-        // Fallback or error handling if preference not found, though unlikely
         setIsLoading(false);
       }
     }

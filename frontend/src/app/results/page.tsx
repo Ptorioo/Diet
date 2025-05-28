@@ -5,8 +5,9 @@ import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import LoadingResults from './loading'; // Ensure this component exists
 
-export async function generateMetadata({ searchParams }: { searchParams: { preference?: string } }): Promise<Metadata> {
-  const preference = searchParams.preference || 'restaurants';
+export async function generateMetadata({ searchParams }: { searchParams: Promise<{ preference?: string }> }): Promise<Metadata> {
+  const params = await searchParams;
+  const preference = params.preference || 'restaurants';
   return {
     title: `Results for ${preference} - Diet`,
     description: `Find the best ${preference} based on your cravings and the weather.`,
@@ -14,9 +15,9 @@ export async function generateMetadata({ searchParams }: { searchParams: { prefe
 }
 
 interface ResultsPageProps {
-  searchParams: {
+  searchParams: Promise<{
     preference?: string;
-  };
+  }>;
 }
 
 // Helper to fetch restaurants filtered by preference from backend
@@ -35,7 +36,8 @@ async function fetchRestaurants(preference: string): Promise<RecommendedRestaura
 }
 
 export default async function ResultsPage({ searchParams }: ResultsPageProps) {
-  const preference = searchParams.preference || 'Any Cuisine'; // Default to 'Any Cuisine' if not specified
+  const params = await searchParams;
+  const preference = params.preference || 'Any Cuisine';
   
   // Simulate picking a random weather condition
   const mockWeather = MOCK_WEATHER_CONDITIONS[Math.floor(Math.random() * MOCK_WEATHER_CONDITIONS.length)]; // Keep for display
