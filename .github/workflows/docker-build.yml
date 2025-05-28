@@ -1,0 +1,37 @@
+name: Docker-Compose Build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and start services
+        run: docker-compose up -d --build
+
+      - name: Wait for services to be healthy
+        run: |
+          docker-compose ps
+          sleep 15
+
+      - name: Check container status
+        run: |
+          docker-compose ps
+          if [ $(docker-compose ps -q | xargs docker inspect -f '{{.State.Status}}' | grep -vc running) -ne 0 ]; then
+            docker-compose logs
+            exit 1
+          fi
+
+      - name: Shut down services
+        run: docker-compose down

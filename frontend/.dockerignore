@@ -1,0 +1,6 @@
+Dockerfile
+.dockerignore
+/*.env
+/node_modules
+/*.d.ts
+/*.next
