@@ -26,6 +26,13 @@ export default function SelectPreferencesPage() {
         const res = await fetch(`${apiUrl}/api/labels`, { cache: 'no-store' });
         if (!res.ok) throw new Error('Failed to fetch labels');
         const data = await res.json();
+
+        // shuffle data
+        for (let i = data.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [data[i], data[j]] = [data[j], data[i]];
+        }
+
         setLabels(data);
         setCurrentIndex(data.length - 1);
         currentIndexRef.current = data.length - 1;
@@ -47,7 +54,6 @@ export default function SelectPreferencesPage() {
         if (prev <= 1) {
           clearInterval(intervalRef.current!);
           setTimerActive(false);
-          handleTimeoutSwipe();
           return 0;
         }
         return prev - 1;
@@ -56,6 +62,12 @@ export default function SelectPreferencesPage() {
 
     return () => clearInterval(intervalRef.current!);
   }, [timerActive, currentIndex]);
+
+  useEffect(() => {
+    if (timer === 0 && timerActive === false && currentIndex >= 0) {
+      handleTimeoutSwipe();
+    }
+  }, [timer, timerActive, currentIndex]);
 
   const handleTimeoutSwipe = async () => {
     if (!swipeInProgress && currentIndex >= 0) {
