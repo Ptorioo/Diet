@@ -15,17 +15,10 @@ const RestaurantCard = ({ restaurant, isTopPick, weather }: RestaurantCardProps)
   const weatherNorm = weather.toLowerCase(); //Normalized weather
   let seatingAdvantage = "";
   if (!restaurant.eat_in) {
-    if (weatherNorm.includes("sunny") || weatherNorm.includes("clear") || weatherNorm.includes("breeze")) {
-      seatingAdvantage = "Great outdoor seating for this weather!";
-    } else if (weatherNorm.includes("rain") || weatherNorm.includes("drizzle")) {
-      seatingAdvantage = "Has outdoor seating (check if covered).";
-    }
-  } else {
-     if (weatherNorm.includes("rain") || weatherNorm.includes("drizzle")) {
-      seatingAdvantage = "Cozy indoor seating, perfect for rainy days.";
+    if (weatherNorm.includes("rain") || weatherNorm.includes("drizzle")) {
+      seatingAdvantage = "No indoor seating, might be troublesome for rainy days.";
     }
   }
-
 
   return (
     <Card className={cn(
