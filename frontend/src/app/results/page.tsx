@@ -22,7 +22,7 @@ interface ResultsPageProps {
 
 // Helper to fetch restaurants filtered by preference from backend
 async function fetchRestaurants(preference: string): Promise<Restaurant[]> {
-  const apiUrl = process.env.APP_API_URL;
+  const apiUrl = process.env.NEXT_PUBLIC_APP_API_URL;
   // Add filter param only if preference exists and is not 'Any Cuisine'
   const query = preference && preference !== 'Any Cuisine' ? `?cuisine=${encodeURIComponent(preference.toLowerCase())}` : '';
   const res = await fetch(`${apiUrl}/api/restaurants${query}`, { cache: 'no-store' }); // no-store to avoid caching in dev
@@ -53,7 +53,7 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
   const params = await searchParams;
   const preference = params.preference || '12';
 
-  const apiUrl = process.env.APP_API_URL;
+  const apiUrl = process.env.NEXT_PUBLIC_APP_API_URL;
   // Fetch weather from API, fallback to mock if unavailable
   const weather = apiUrl
     ? await fetchWeather(apiUrl)
@@ -71,7 +71,7 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
       ...restaurant,
       eat_in: restaurant.eat_in || false,
       type: restaurant.type || preference,
-      latitiude: restaurant.latitude || 'Unknown Latitude',
+      latitude: restaurant.latitude || 'Unknown Latitude',
       longitude: restaurant.longitude || "Unknown Longitude",
     };
   });
