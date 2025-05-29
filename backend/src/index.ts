@@ -1,6 +1,6 @@
 import cors from 'cors';
 import express from 'express';
-import preferenceRoutes from './routes/preferenceRoutes';
+import labelRoutes from './routes/labelRoutes';
 import restaurantRoutes from './routes/restaurantRoutes';
 
 const app = express();
@@ -10,7 +10,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use('/api/restaurants', restaurantRoutes);
-app.use('/api/preferences', preferenceRoutes);
+app.use('/api/labels', labelRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
