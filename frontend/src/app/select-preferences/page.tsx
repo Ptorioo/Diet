@@ -1,18 +1,24 @@
 'use client';
-import PreferenceSelector from '@/components/preferences/PreferenceSelector';
-import { useState, useEffect, useRef } from 'react';
+
+import React from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import TinderCard from 'react-tinder-card';
 import type { RestaurantPreference } from '@/lib/types';
 
 export default function SelectPreferencesPage() {
+  const [labels, setLabels] = useState<RestaurantPreference[]>([]);
   const [timer, setTimer] = useState(10);
   const [timerActive, setTimerActive] = useState(true);
-  const [selectedPreferenceId, setSelectedPreferenceId] = useState<string | null>(null);
-  const [labels, setLabels] = useState<RestaurantPreference[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(-1); // starts at -1 until data loaded
+  const [swipeInProgress, setSwipeInProgress] = useState(false);
+
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const router = useRouter();
+  const currentIndexRef = useRef(currentIndex);
+  const childRefs = useRef<React.RefObject<any>[]>([]);
 
-  // Fetch labels from API
+  // Fetch labels
   useEffect(() => {
     const fetchLabels = async () => {
       try {
@@ -21,45 +27,116 @@ export default function SelectPreferencesPage() {
         if (!res.ok) throw new Error('Failed to fetch labels');
         const data = await res.json();
         setLabels(data);
-      } catch (error) {
-        console.error('Error fetching labels:', error);
-        setLabels([]); // fallback to empty array
+        setCurrentIndex(data.length - 1);
+        currentIndexRef.current = data.length - 1;
+        childRefs.current = Array(data.length).fill(0).map(() => React.createRef());
+      } catch (err) {
+        console.error('Error fetching labels:', err);
+        setLabels([]);
       }
     };
     fetchLabels();
   }, []);
 
+  // Timer logic
   useEffect(() => {
-    if (!timerActive) return;
+    if (!timerActive || currentIndex < 0) return;
 
     intervalRef.current = setInterval(() => {
-      setTimer((prevTimer) => {
-        if (prevTimer <= 1) {
+      setTimer((prev) => {
+        if (prev <= 1) {
           clearInterval(intervalRef.current!);
           setTimerActive(false);
+          handleTimeoutSwipe();
           return 0;
         }
-        return prevTimer - 1;
+        return prev - 1;
       });
     }, 1000);
 
     return () => clearInterval(intervalRef.current!);
-  }, [timerActive]);
+  }, [timerActive, currentIndex]);
 
-  // This effect handles navigation when timer reaches 0
-  useEffect(() => {
-    if (timer === 0 && labels.length > 0) {
-      let preferenceId: string;
-      if (selectedPreferenceId) {
-        preferenceId = selectedPreferenceId;
-      } else {
-        const randomIndex = Math.floor(Math.random() * labels.length);
-        preferenceId = labels[randomIndex].id;
-      }
-      // Redirect to results with the selected or random preference
-      router.push(`/results?preference=${encodeURIComponent(preferenceId)}`);
+  const handleTimeoutSwipe = async () => {
+    if (!swipeInProgress && currentIndex >= 0) {
+      setSwipeInProgress(true);
+      await childRefs.current[currentIndex]?.current?.swipe('left');
     }
-  }, [timer, router, selectedPreferenceId, labels]);
+  };
+
+  const updateCurrentIndex = (val: number) => {
+    setCurrentIndex(val);
+    currentIndexRef.current = val;
+  };
+
+  const handleSwipe = (direction: string, index: number) => {
+    if (direction === 'right') {
+      const selected = labels[index];
+      router.push(`/results?preference=${encodeURIComponent(selected.id)}`);
+    } else if (direction === 'left') {
+      const newIndex = index - 1;
+      if (newIndex >= 0) {
+        updateCurrentIndex(newIndex);
+        resetTimer();
+      } else {
+        // All cards swiped left → pick random
+        const randomIndex = Math.floor(Math.random() * labels.length);
+        const randomPreference = labels[randomIndex];
+        router.push(`/results?preference=${encodeURIComponent(randomPreference.id)}`);
+      }
+    }
+    setSwipeInProgress(false);
+  };
+
+  const resetTimer = () => {
+    setTimer(10);
+    setTimerActive(true);
+  };
+
+  const swipe = async (dir: 'left' | 'right') => {
+    if (swipeInProgress || currentIndex < 0 || !childRefs.current[currentIndex]) return;
+    setSwipeInProgress(true);
+    await childRefs.current[currentIndex].current.swipe(dir);
+  };
+
+  const canSwipe = currentIndex >= 0;
+
+  const memoizedCards = useMemo(() => {
+    return labels.map((label, index) => (
+      <TinderCard
+        key={label.id}
+        ref={childRefs.current[index]}
+        onSwipe={(dir) => handleSwipe(dir, index)}
+        preventSwipe={['up', 'down']}
+        swipeRequirementType={"velocity"}
+        swipeThreshold={1.1}
+      >
+        <div
+          style={{
+            position: 'absolute',
+            width: '300px',
+            height: '200px',
+            backgroundColor: '#f7f7f7',
+            border: '1px solid #ccc',
+            borderRadius: '10px',
+            padding: '20px',
+            textAlign: 'center',
+            fontSize: '24px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 8px 17px rgba(0,0,0,0.2)',
+            top: 0,
+            left: 0,
+            zIndex: labels.length - index,
+            cursor: 'grab',
+          }}
+        >
+          {label.label_name}
+        </div>
+      </TinderCard>
+    ));
+  }, [labels]);
 
   const initialTime = 11;
   const radius = 50;
@@ -94,15 +171,35 @@ export default function SelectPreferencesPage() {
           </svg>
         </div>
       )}
-      <PreferenceSelector
-        selectedPreferenceId={selectedPreferenceId}
-        setSelectedPreferenceId={setSelectedPreferenceId}
-        labels={labels}
-        onSubmit={(preferenceId) => {
-          setSelectedPreferenceId(preferenceId);
-          router.push(`/results?preference=${encodeURIComponent(preferenceId)}`);
+
+      <div
+        className="cardContainer"
+        style={{
+          position: 'relative',
+          width: '300px',
+          height: '220px',
+          margin: '30px auto',
         }}
-      />
+      >
+        {memoizedCards}
+      </div>
+
+      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px', gap: '10px' }}>
+        <button
+          onClick={() => swipe('left')}
+          disabled={!canSwipe || swipeInProgress}
+          style={{ backgroundColor: '#f44336', color: 'white', padding: '10px 20px', borderRadius: '5px' }}
+        >
+          Nope 😪
+        </button>
+        <button
+          onClick={() => swipe('right')}
+          disabled={!canSwipe || swipeInProgress}
+          style={{ backgroundColor: '#4caf50', color: 'white', padding: '10px 20px', borderRadius: '5px' }}
+        >
+          Sure 😋
+        </button>
+      </div>
     </>
   );
 }
