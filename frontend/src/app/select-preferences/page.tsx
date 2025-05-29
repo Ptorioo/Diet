@@ -8,7 +8,7 @@ import type { RestaurantPreference } from '@/lib/types';
 
 export default function SelectPreferencesPage() {
   const [labels, setLabels] = useState<RestaurantPreference[]>([]);
-  const [timer, setTimer] = useState(10);
+  const [timer, setTimer] = useState(3);
   const [timerActive, setTimerActive] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(-1); // starts at -1 until data loaded
   const [swipeInProgress, setSwipeInProgress] = useState(false);
@@ -89,7 +89,7 @@ export default function SelectPreferencesPage() {
   };
 
   const resetTimer = () => {
-    setTimer(10);
+    setTimer(3);
     setTimerActive(true);
   };
 
@@ -138,7 +138,7 @@ export default function SelectPreferencesPage() {
     ));
   }, [labels]);
 
-  const initialTime = 11;
+  const initialTime = 3.4;
   const radius = 50;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (timer / initialTime) * circumference;
