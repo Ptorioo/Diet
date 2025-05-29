@@ -59,7 +59,7 @@ const PreferenceSelector = ({
       setIsLoading(true);
       const selectedPreference = labels.find(p => p.id === selectedPreferenceId);
       if (selectedPreference) {
-        router.push(`/results?preference=${encodeURIComponent(selectedPreference.label_name)}`);
+        router.push(`/results?preference=${encodeURIComponent(selectedPreference.id)}`);
       } else {
         setIsLoading(false);
       }

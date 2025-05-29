@@ -2,11 +2,7 @@
 import PreferenceSelector from '@/components/preferences/PreferenceSelector';
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-
-export interface RestaurantPreference {
-  id: string;
-  label_name: string;
-}
+import type { RestaurantPreference } from '@/lib/types';
 
 export default function SelectPreferencesPage() {
   const [timer, setTimer] = useState(10);
@@ -53,15 +49,14 @@ export default function SelectPreferencesPage() {
   // This effect handles navigation when timer reaches 0
   useEffect(() => {
     if (timer === 0 && labels.length > 0) {
-      let preferenceName: string;
+      let preferenceId: string;
       if (selectedPreferenceId) {
-        const selectedPreference = labels.find(p => p.id === selectedPreferenceId);
-        preferenceName = selectedPreference ? selectedPreference.label_name : '';
+        preferenceId = selectedPreferenceId;
       } else {
         const randomIndex = Math.floor(Math.random() * labels.length);
-        preferenceName = labels[randomIndex].label_name;
+        preferenceId = labels[randomIndex].id;
       }
-      router.push(`/results?preference=${encodeURIComponent(preferenceName.toLowerCase())}`);
+      router.push(`/results?preference=${encodeURIComponent(preferenceId)}`);
     }
   }, [timer, router, selectedPreferenceId, labels]);
 

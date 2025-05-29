@@ -21,16 +21,17 @@ interface ResultsPageProps {
 }
 
 // Helper to fetch restaurants filtered by preference from backend
-async function fetchRestaurants(preference: string): Promise<Restaurant[]> {
+async function fetchRestaurants(preferenceId: string): Promise<Restaurant[]> {
   const apiUrl = process.env.NEXT_PUBLIC_APP_API_URL;
-  // Add filter param only if preference exists and is not 'Any Cuisine'
-  const query = preference && preference !== 'Any Cuisine' ? `?cuisine=${encodeURIComponent(preference.toLowerCase())}` : '';
-  const res = await fetch(`${apiUrl}/api/restaurants${query}`, { cache: 'no-store' }); // no-store to avoid caching in dev
+  const query = preferenceId && preferenceId !== '12'
+    ? `?mlabel_id=${encodeURIComponent(preferenceId)}`
+    : '';
+  const res = await fetch(`${apiUrl}/api/restaurants${query}`, { cache: 'no-store' });
   if (!res.ok) {
     throw new Error('Failed to fetch restaurants');
   }
   const data = await res.json();
-  console.log(`Fetched restaurants for preference "${preference}":`, data); // Debug log
+  console.log(`Fetched restaurants for preferenceId "${preferenceId}":`, data);
   return data;
 }
 

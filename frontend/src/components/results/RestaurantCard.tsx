@@ -47,15 +47,14 @@ const RestaurantCard = ({ restaurant, isTopPick, weather }: RestaurantCardProps)
       </div>
       <CardHeader className="pb-3">
         <CardTitle className="text-xl sm:text-2xl font-bold text-foreground">{restaurant.name}</CardTitle>
-        {restaurant.type && <CardDescription className="text-sm text-muted-foreground">{restaurant.type}</CardDescription>}
       </CardHeader>
       <CardContent className="flex-grow space-y-3 text-sm">
         <div className="flex items-center space-x-2 text-muted-foreground">
-          {!restaurant.eat_in ? 
+          {restaurant.eat_in ? 
             <Sun className="w-5 h-5 text-green-600" /> : 
             <CloudRain className="w-5 h-5 text-blue-500" />
           }
-          <span>{!restaurant.eat_in ? 'Outdoor Seating Available' : 'Indoor Seating'}</span>
+          <span>{restaurant.eat_in ? 'Indoor Seating Available' : 'Indoor Seating Not Available'}</span>
         </div>
         {seatingAdvantage && <p className="text-xs text-primary">{seatingAdvantage}</p>}
         {restaurant.latitude !== undefined && restaurant.longitude !== undefined && (
