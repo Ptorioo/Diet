@@ -5,12 +5,10 @@ import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import LoadingResults from './loading'; // Ensure this component exists
 
-export async function generateMetadata({ searchParams }: { searchParams: Promise<{ preference?: string }> }): Promise<Metadata> {
-  const params = await searchParams;
-  const preference = params.preference || 'restaurants';
+export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: `Results for ${preference} - Diet`,
-    description: `Find the best ${preference} based on your cravings and the weather.`,
+    title: `Results for you - Diet`,
+    description: `Find the best based on your cravings and the weather.`,
   };
 }
 
