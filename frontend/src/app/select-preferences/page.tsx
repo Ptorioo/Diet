@@ -56,6 +56,8 @@ export default function SelectPreferencesPage() {
         const randomIndex = Math.floor(Math.random() * labels.length);
         preferenceId = labels[randomIndex].id;
       }
+      // Redirect to results with the selected or random preference
+      router.push(`/results?preference=${encodeURIComponent(preferenceId)}`);
     }
   }, [timer, router, selectedPreferenceId, labels]);
 
