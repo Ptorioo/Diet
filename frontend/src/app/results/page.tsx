@@ -1,32 +1,29 @@
+'use client';
 import ResultsList from '@/components/results/ResultsList';
 import { MOCK_WEATHER_CONDITIONS } from '@/lib/mockData';
 import type { Restaurant } from '@/lib/types';
-import type { Metadata } from 'next';
-import { Suspense } from 'react';
-import LoadingResults from './loading'; // Ensure this component exists
-
-export async function generateMetadata(): Promise<Metadata> {
-  return {
-    title: `Results for you - Diet`,
-    description: `Find the best based on your cravings and the weather.`,
-  };
-}
+import { Suspense, useEffect, useState } from 'react';
+import LoadingResults from './loading';
+import { useUserLocation } from '@/lib/useUserLocation';
 
 interface ResultsPageProps {
   searchParams: Promise<{
     preference?: string;
-    latitude?: string;
-    longitude?: string;
   }>;
 }
 
 // Helper to fetch restaurants filtered by preference from backend
-async function fetchRestaurants(preferenceId: string): Promise<Restaurant[]> {
+async function fetchRestaurants(
+  preferenceId: string,
+  lat: number,
+  lon: number
+): Promise<Restaurant[]> {
   const apiUrl = process.env.NEXT_PUBLIC_APP_API_URL;
-  const query = preferenceId && preferenceId !== '12'
-    ? `?mlabel_id=${encodeURIComponent(preferenceId)}`
-    : '';
-  const res = await fetch(`${apiUrl}/api/restaurants${query}`, { cache: 'no-store' });
+  const query =
+    preferenceId && preferenceId !== '12'
+      ? `?mlabel_id=${encodeURIComponent(preferenceId)}&method=walk&origin_lat=${lat}&origin_lng=${lon}`
+      : 'mlabel_id=12';
+  const res = await fetch(`${apiUrl}/api/restaurants/${query}`, { cache: 'no-store' });
   if (!res.ok) {
     throw new Error('Failed to fetch restaurants');
   }
@@ -39,7 +36,11 @@ async function fetchWeather(lat: string, lon: string): Promise<string> {
   try {
     const apiKey = process.env.NEXT_PUBLIC_VISUALCROSSING_API_KEY;
     if (!apiKey) throw new Error('Missing Visual Crossing API key');
-    const url = `https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${encodeURIComponent(lat)},${encodeURIComponent(lon)}/today?unitGroup=metric&include=current,days&key=${apiKey}&contentType=json`;
+    const url = `https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${encodeURIComponent(
+      lat
+    )},${encodeURIComponent(
+      lon
+    )}/today?unitGroup=metric&include=current,days&key=${apiKey}&contentType=json`;
 
     const res = await fetch(url, { cache: 'no-store' });
     if (!res.ok) throw new Error('Failed to fetch weather');
@@ -56,37 +57,53 @@ async function fetchWeather(lat: string, lon: string): Promise<string> {
   }
 }
 
-export default async function ResultsPage({ searchParams }: ResultsPageProps) {
-  const params = await searchParams;
-  const preference = params.preference || '12';
-  const lat = params.latitude || '25.017329';
-  const lon = params.longitude || '121.539752';
+export default function ResultsPage({ searchParams }: ResultsPageProps) {
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+  const [weather, setWeather] = useState<string>('');
+  const [loading, setLoading] = useState(true);
+  const { location, error } = useUserLocation();
 
-  const weather = await fetchWeather(lat, lon);
+  useEffect(() => {
+    async function fetchData() {
+      setLoading(true);
+      try {
+        const params = await searchParams;
+        const preference = params.preference || '12';
+        if (!location) return;
+        const fetchedRestaurants = await fetchRestaurants(preference, location.lat, location.lon);
+        setRestaurants(
+          fetchedRestaurants.map((restaurant) => ({
+            ...restaurant,
+            eat_in: restaurant.eat_in || false,
+            type: restaurant.type || preference,
+            latitude: restaurant.latitude || 'Unknown Latitude',
+            longitude: restaurant.longitude || 'Unknown Longitude',
+          }))
+        );
+        const fetchedWeather = await fetchWeather(location.lat.toString(), location.lon.toString());
+        setWeather(fetchedWeather);
+      } catch (err) {
+        console.error('Error fetching data:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    if (location) {
+      fetchData();
+    }
+  }, [location, searchParams]);
 
-  let restaurants: Restaurant[] = [];
-  try {
-    restaurants = await fetchRestaurants(preference);
-  } catch (error) {
-    console.error('Error fetching restaurants:', error);
-  }
+  if (error) return <div>Error: {error}</div>;
+  if (!location || loading) return <LoadingResults />;
 
-  restaurants = restaurants.map(restaurant => {
-    return {
-      ...restaurant,
-      eat_in: restaurant.eat_in || false,
-      type: restaurant.type || preference,
-      latitude: restaurant.latitude || 'Unknown Latitude',
-      longitude: restaurant.longitude || "Unknown Longitude",
-    };
-  });
+  const params = { preference: '12' }; // fallback if needed
 
   return (
     <Suspense fallback={<LoadingResults />}>
       <ResultsList
         restaurants={restaurants}
         weather={weather}
-        preference={preference}
+        preference={params.preference}
       />
     </Suspense>
   );

@@ -46,38 +46,6 @@ export default function SelectPreferencesPage() {
     return () => clearInterval(intervalRef.current!);
   }, [timerActive]);
 
-  // Helper to send location and navigate
-  const sendLocationAndNavigate = (preferenceId: string) => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          try {
-            const apiUrl = process.env.NEXT_PUBLIC_APP_API_URL;
-            await fetch(`${apiUrl}/api/location`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                latitude: position.coords.latitude,
-                longitude: position.coords.longitude,
-              }),
-            });
-          } catch (error) {
-            console.error('Failed to send location:', error);
-          } finally {
-            router.push(`/results?preference=${encodeURIComponent(preferenceId)}`);
-          }
-        },
-        () => {
-          // On geolocation error, just navigate
-          router.push(`/results?preference=${encodeURIComponent(preferenceId)}`);
-        }
-      );
-    } else {
-      // If geolocation is not available, just navigate
-      router.push(`/results?preference=${encodeURIComponent(preferenceId)}`);
-    }
-  };
-
   // This effect handles navigation when timer reaches 0
   useEffect(() => {
     if (timer === 0 && labels.length > 0) {
@@ -88,7 +56,6 @@ export default function SelectPreferencesPage() {
         const randomIndex = Math.floor(Math.random() * labels.length);
         preferenceId = labels[randomIndex].id;
       }
-      sendLocationAndNavigate(preferenceId);
     }
   }, [timer, router, selectedPreferenceId, labels]);
 
@@ -129,7 +96,10 @@ export default function SelectPreferencesPage() {
         selectedPreferenceId={selectedPreferenceId}
         setSelectedPreferenceId={setSelectedPreferenceId}
         labels={labels}
-        onSubmit={sendLocationAndNavigate}
+        onSubmit={(preferenceId) => {
+          setSelectedPreferenceId(preferenceId);
+          router.push(`/results?preference=${encodeURIComponent(preferenceId)}`);
+        }}
       />
     </>
   );
