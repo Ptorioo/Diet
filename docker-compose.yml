@@ -5,7 +5,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=development
       - APP_API_URL=http://backend:3001
     depends_on:
       - backend
@@ -16,4 +16,4 @@ services:
     ports:
       - "3001:3001"
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=development
