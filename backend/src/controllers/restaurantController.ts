@@ -10,14 +10,14 @@ export const getRestaurants = async (req: Request, res: Response) => {
 
     const conditions: string[] = [];
 
-    if (cuisine) {
-      conditions.push(`type = $${values.length + 1}`);
-      values.push(cuisine);
-    }
+    // if (cuisine) {
+    //   conditions.push(`type = $${values.length + 1}`);
+    //   values.push(cuisine);
+    // }
 
-    if (conditions.length > 0) {
-      query += ` WHERE ` + conditions.join(' AND ');
-    }
+    // if (conditions.length > 0) {
+    //   query += ` WHERE ` + conditions.join(' AND ');
+    // }
 
     const result = await pool.query(query, values);
     res.json(result.rows);

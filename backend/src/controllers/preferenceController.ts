@@ -1,10 +1,28 @@
 import { Request, Response } from 'express';
+import { pool } from '../utils/db';
 
-let preferenceStore: Record<string, any> = {};
+export const getPreferences = async (req: Request, res: Response) => {
+  try {
+    const { cuisine, budget } = req.query;
 
-export const savePreferences = (req: Request, res: Response) => {
-  const { userId, preferences } = req.body;
-  preferenceStore[userId] = preferences;
+    let query = `SELECT * FROM restaurant_preferences`;
+    const values: any[] = [];
 
-  res.status(200).json({ message: 'Preferences saved', preferences });
+    const conditions: string[] = [];
+
+    if (cuisine) {
+      conditions.push(`type = $${values.length + 1}`);
+      values.push(cuisine);
+    }
+
+    if (conditions.length > 0) {
+      query += ` WHERE ` + conditions.join(' AND ');
+    }
+
+    const result = await pool.query(query, values);
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching restaurants:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 };

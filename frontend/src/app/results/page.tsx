@@ -51,6 +51,8 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
   restaurants = restaurants.map(restaurant => {
     return {
       ...restaurant,
+      rating: 5,
+      hasOutdoorSeating: false,
       type: restaurant.type || preference,
       address: restaurant.address || 'Unknown Address',
       image_url: restaurant.imageUrl || "https://placehold.co/600x400.png", // Use a placeholder image if none exists
