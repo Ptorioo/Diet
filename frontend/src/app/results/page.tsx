@@ -34,19 +34,37 @@ async function fetchRestaurants(preference: string): Promise<RecommendedRestaura
   return data;
 }
 
+// Helper to fetch weather from backend
+async function fetchWeather(apiUrl: string): Promise<string> {
+  try {
+    const res = await fetch(`${apiUrl}/api/weather`, { cache: 'no-store' });
+    if (!res.ok) throw new Error('Failed to fetch weather');
+    const data = await res.json();
+    // Assume API returns { condition: "Sunny" }
+    return data.condition || MOCK_WEATHER_CONDITIONS[0];
+  } catch (error) {
+    console.error('Error fetching weather:', error);
+    // Fallback to random mock weather
+    return MOCK_WEATHER_CONDITIONS[Math.floor(Math.random() * MOCK_WEATHER_CONDITIONS.length)];
+  }
+}
+
 export default async function ResultsPage({ searchParams }: ResultsPageProps) {
   const params = await searchParams;
   const preference = params.preference || 'Any Cuisine';
-  
-  // Simulate picking a random weather condition
-  const mockWeather = MOCK_WEATHER_CONDITIONS[Math.floor(Math.random() * MOCK_WEATHER_CONDITIONS.length)]; // Keep for display
-  
+
+  const apiUrl = process.env.APP_API_URL;
+  // Fetch weather from API, fallback to mock if unavailable
+  const weather = apiUrl
+    ? await fetchWeather(apiUrl)
+    : MOCK_WEATHER_CONDITIONS[Math.floor(Math.random() * MOCK_WEATHER_CONDITIONS.length)];
+
   let restaurants: RecommendedRestaurant[] = [];
   try {
     restaurants = await fetchRestaurants(preference);
   } catch (error) {
     console.error('Error fetching restaurants:', error);
-  };
+  }
 
   restaurants = restaurants.map(restaurant => {
     return {
@@ -55,18 +73,17 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
       hasOutdoorSeating: false,
       type: restaurant.type || preference,
       address: restaurant.address || 'Unknown Address',
-      image_url: restaurant.imageUrl || "https://placehold.co/600x400.png", // Use a placeholder image if none exists
+      image_url: restaurant.imageUrl || "https://placehold.co/600x400.png",
       hint: restaurant.hint || 'No additional information available',
-      score: restaurant.score !== undefined ? restaurant.score : 0, // Default score to 0 if not provided
+      score: restaurant.score !== undefined ? restaurant.score : 0,
     };
-  }
-  )
+  });
 
   return (
     <Suspense fallback={<LoadingResults />}>
       <ResultsList
         restaurants={restaurants}
-        weather={mockWeather}
+        weather={weather}
         preference={preference}
       />
     </Suspense>
