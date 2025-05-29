@@ -12,6 +12,8 @@ interface ResultsPageProps {
   }>;
 }
 
+const DEFAULT_LOCATION = { lat: 25.0182544, lon: 121.5354438 };
+
 // Helper to fetch restaurants filtered by preference from backend
 async function fetchRestaurants(
   preferenceId: string,
@@ -69,8 +71,10 @@ export default function ResultsPage({ searchParams }: ResultsPageProps) {
       try {
         const params = await searchParams;
         const preference = params.preference || '12';
-        if (!location) return;
-        const fetchedRestaurants = await fetchRestaurants(preference, location.lat, location.lon);
+        // Use default location if error exists
+        const coords = error ? DEFAULT_LOCATION : location;
+        if (!coords) return;
+        const fetchedRestaurants = await fetchRestaurants(preference, coords.lat, coords.lon);
         setRestaurants(
           fetchedRestaurants.map((restaurant) => ({
             ...restaurant,
@@ -80,7 +84,7 @@ export default function ResultsPage({ searchParams }: ResultsPageProps) {
             longitude: restaurant.longitude || 'Unknown Longitude',
           }))
         );
-        const fetchedWeather = await fetchWeather(location.lat.toString(), location.lon.toString());
+        const fetchedWeather = await fetchWeather(coords.lat.toString(), coords.lon.toString());
         setWeather(fetchedWeather);
       } catch (err) {
         console.error('Error fetching data:', err);
@@ -88,13 +92,13 @@ export default function ResultsPage({ searchParams }: ResultsPageProps) {
         setLoading(false);
       }
     }
-    if (location) {
+    // Fetch when location or error changes
+    if (location || error) {
       fetchData();
     }
-  }, [location, searchParams]);
+  }, [location, error, searchParams]);
 
-  if (error) return <div>Error: {error}</div>;
-  if (!location || loading) return <LoadingResults />;
+  if (loading) return <LoadingResults />;
 
   const params = { preference: '12' }; // fallback if needed
 
