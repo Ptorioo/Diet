@@ -15,6 +15,8 @@ export async function generateMetadata(): Promise<Metadata> {
 interface ResultsPageProps {
   searchParams: Promise<{
     preference?: string;
+    latitude?: string;
+    longitude?: string;
   }>;
 }
 
@@ -29,21 +31,27 @@ async function fetchRestaurants(preferenceId: string): Promise<Restaurant[]> {
     throw new Error('Failed to fetch restaurants');
   }
   const data = await res.json();
-  console.log(`Fetched restaurants for preferenceId "${preferenceId}":`, data);
   return data;
 }
 
-// Helper to fetch weather from backend
-async function fetchWeather(apiUrl: string): Promise<string> {
+// Helper to fetch weather from API
+async function fetchWeather(lat: string, lon: string): Promise<string> {
   try {
-    const res = await fetch(`${apiUrl}/api/weather`, { cache: 'no-store' });
+    const apiKey = process.env.NEXT_PUBLIC_VISUALCROSSING_API_KEY;
+    if (!apiKey) throw new Error('Missing Visual Crossing API key');
+    const url = `https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${encodeURIComponent(lat)},${encodeURIComponent(lon)}/today?unitGroup=metric&include=current,days&key=${apiKey}&contentType=json`;
+
+    const res = await fetch(url, { cache: 'no-store' });
     if (!res.ok) throw new Error('Failed to fetch weather');
     const data = await res.json();
-    // Assume API returns { condition: "Sunny" }
-    return data.condition || MOCK_WEATHER_CONDITIONS[0];
+
+    return (
+      data.currentConditions?.conditions ||
+      data.days?.[0]?.conditions ||
+      MOCK_WEATHER_CONDITIONS[0]
+    );
   } catch (error) {
     console.error('Error fetching weather:', error);
-    // Fallback to random mock weather
     return MOCK_WEATHER_CONDITIONS[Math.floor(Math.random() * MOCK_WEATHER_CONDITIONS.length)];
   }
 }
@@ -51,12 +59,10 @@ async function fetchWeather(apiUrl: string): Promise<string> {
 export default async function ResultsPage({ searchParams }: ResultsPageProps) {
   const params = await searchParams;
   const preference = params.preference || '12';
+  const lat = params.latitude || '25.017329';
+  const lon = params.longitude || '121.539752';
 
-  const apiUrl = process.env.NEXT_PUBLIC_APP_API_URL;
-  // Fetch weather from API, fallback to mock if unavailable
-  const weather = apiUrl
-    ? await fetchWeather(apiUrl)
-    : MOCK_WEATHER_CONDITIONS[Math.floor(Math.random() * MOCK_WEATHER_CONDITIONS.length)];
+  const weather = await fetchWeather(lat, lon);
 
   let restaurants: Restaurant[] = [];
   try {

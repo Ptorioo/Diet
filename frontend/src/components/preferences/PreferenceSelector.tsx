@@ -42,10 +42,12 @@ const PreferenceSelector = ({
   selectedPreferenceId,
   setSelectedPreferenceId,
   labels,
+  onSubmit,
 }: {
   selectedPreferenceId: string | null;
   setSelectedPreferenceId: (id: string) => void;
   labels: RestaurantPreference[];
+  onSubmit: (preferenceId: string) => void;
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -57,6 +59,7 @@ const PreferenceSelector = ({
   const handleSubmit = () => {
     if (selectedPreferenceId) {
       setIsLoading(true);
+      onSubmit(selectedPreferenceId);
       const selectedPreference = labels.find(p => p.id === selectedPreferenceId);
       if (selectedPreference) {
         router.push(`/results?preference=${encodeURIComponent(selectedPreference.id)}`);
