@@ -5,7 +5,7 @@ export const getPreferences = async (req: Request, res: Response) => {
   try {
     const { cuisine, budget } = req.query;
 
-    let query = `SELECT * FROM restaurant_preferences`;
+    let query = `SELECT * FROM restaurant_preferences_mock`;
     const values: any[] = [];
 
     const conditions: string[] = [];

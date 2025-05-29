@@ -2,14 +2,36 @@
 import PreferenceSelector from '@/components/preferences/PreferenceSelector';
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { RESTAURANT_TYPES } from '@/lib/mockData';
+
+export interface RestaurantPreference {
+  id: string;
+  label_name: string;
+}
 
 export default function SelectPreferencesPage() {
   const [timer, setTimer] = useState(10);
   const [timerActive, setTimerActive] = useState(true);
-  const [selectedPreferenceId, setSelectedPreferenceId] = useState<string | null>(null); // <-- lifted state
+  const [selectedPreferenceId, setSelectedPreferenceId] = useState<string | null>(null);
+  const [labels, setLabels] = useState<RestaurantPreference[]>([]);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const router = useRouter();
+
+  // Fetch labels from API
+  useEffect(() => {
+    const fetchLabels = async () => {
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_APP_API_URL;
+        const res = await fetch(`${apiUrl}/api/labels`, { cache: 'no-store' });
+        if (!res.ok) throw new Error('Failed to fetch labels');
+        const data = await res.json();
+        setLabels(data);
+      } catch (error) {
+        console.error('Error fetching labels:', error);
+        setLabels([]); // fallback to empty array
+      }
+    };
+    fetchLabels();
+  }, []);
 
   useEffect(() => {
     if (!timerActive) return;
@@ -30,18 +52,18 @@ export default function SelectPreferencesPage() {
 
   // This effect handles navigation when timer reaches 0
   useEffect(() => {
-    if (timer === 0) {
+    if (timer === 0 && labels.length > 0) {
       let preferenceName: string;
       if (selectedPreferenceId) {
-        const selectedPreference = RESTAURANT_TYPES.find(p => p.id === selectedPreferenceId);
-        preferenceName = selectedPreference ? selectedPreference.name : '';
+        const selectedPreference = labels.find(p => p.id === selectedPreferenceId);
+        preferenceName = selectedPreference ? selectedPreference.label_name : '';
       } else {
-        const randomIndex = Math.floor(Math.random() * RESTAURANT_TYPES.length);
-        preferenceName = RESTAURANT_TYPES[randomIndex].name;
+        const randomIndex = Math.floor(Math.random() * labels.length);
+        preferenceName = labels[randomIndex].label_name;
       }
       router.push(`/results?preference=${encodeURIComponent(preferenceName.toLowerCase())}`);
     }
-  }, [timer, router, selectedPreferenceId]);
+  }, [timer, router, selectedPreferenceId, labels]);
 
   const initialTime = 11;
   const radius = 50;
@@ -79,6 +101,7 @@ export default function SelectPreferencesPage() {
       <PreferenceSelector
         selectedPreferenceId={selectedPreferenceId}
         setSelectedPreferenceId={setSelectedPreferenceId}
+        labels={labels}
       />
     </>
   );

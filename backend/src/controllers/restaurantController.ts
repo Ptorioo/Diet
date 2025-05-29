@@ -5,7 +5,7 @@ export const getRestaurants = async (req: Request, res: Response) => {
   try {
     const { cuisine, budget } = req.query;
 
-    let query = `SELECT * FROM restaurants`;
+    let query = `SELECT * FROM restaurant`;
     const values: any[] = [];
 
     const conditions: string[] = [];

@@ -1,10 +1,10 @@
-import type { RecommendedRestaurant } from '@/lib/types';
+import type { Restaurant } from '@/lib/types';
 import RestaurantCard from './RestaurantCard';
 import { AlertCircle, WifiOff } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 interface ResultsListProps {
-  restaurants: RecommendedRestaurant[];
+  restaurants: Restaurant[];
   weather: string;
   preference: string;
 }
@@ -23,8 +23,7 @@ const ResultsList = ({ restaurants, weather, preference }: ResultsListProps) => 
   }
 
   // Sort by score, highest first
-  const sortedRestaurants = [...restaurants].sort((a, b) => b.score - a.score);
-  const topPicksCount = Math.min(2, sortedRestaurants.length); // Emphasize top 1 or 2
+  const topPicksCount = 2; // Emphasize top 1 or 2
 
   return (
     <div className="container mx-auto px-4 py-8 sm:py-12">
@@ -36,7 +35,7 @@ const ResultsList = ({ restaurants, weather, preference }: ResultsListProps) => 
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-        {sortedRestaurants.map((restaurant, index) => (
+        {restaurants.map((restaurant, index) => (
           <RestaurantCard
             key={restaurant.id || restaurant.name} // Prefer ID if available
             restaurant={restaurant}

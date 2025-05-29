@@ -2,12 +2,11 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { RESTAURANT_TYPES } from '@/lib/mockData';
-import type { RestaurantPreference } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
+import type { RestaurantPreference } from '@/lib/types';
 
 const PreferenceCard = ({
   preference,
@@ -18,7 +17,7 @@ const PreferenceCard = ({
   isSelected: boolean;
   onSelect: () => void;
 }) => {
-  const Icon = preference.icon;
+  // No icon anymore, just show label
   return (
     <Card
       className={cn(
@@ -31,9 +30,8 @@ const PreferenceCard = ({
       onKeyDown={(e) => e.key === 'Enter' && onSelect()}
     >
       <CardContent className="flex flex-col items-center justify-center p-6 space-y-3">
-        <Icon className={cn("h-12 w-12 mb-2", isSelected ? "text-primary" : "text-muted-foreground group-hover:text-primary")} />
         <span className={cn("text-lg font-medium", isSelected ? "text-primary" : "text-card-foreground")}>
-          {preference.name}
+          {preference.label_name}
         </span>
       </CardContent>
     </Card>
@@ -43,9 +41,11 @@ const PreferenceCard = ({
 const PreferenceSelector = ({
   selectedPreferenceId,
   setSelectedPreferenceId,
+  labels,
 }: {
   selectedPreferenceId: string | null;
   setSelectedPreferenceId: (id: string) => void;
+  labels: RestaurantPreference[];
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -57,9 +57,9 @@ const PreferenceSelector = ({
   const handleSubmit = () => {
     if (selectedPreferenceId) {
       setIsLoading(true);
-      const selectedPreference = RESTAURANT_TYPES.find(p => p.id === selectedPreferenceId);
+      const selectedPreference = labels.find(p => p.id === selectedPreferenceId);
       if (selectedPreference) {
-        router.push(`/results?preference=${encodeURIComponent(selectedPreference.name)}`);
+        router.push(`/results?preference=${encodeURIComponent(selectedPreference.label_name)}`);
       } else {
         setIsLoading(false);
       }
@@ -76,7 +76,7 @@ const PreferenceSelector = ({
       </p>
       
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 mb-12">
-        {RESTAURANT_TYPES.map((preference) => (
+        {labels.map((preference) => (
           <PreferenceCard
             key={preference.id}
             preference={preference}
