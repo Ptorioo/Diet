@@ -20,7 +20,7 @@ export default function SelectPreferencesPage() {
   useEffect(() => {
     const fetchLabels = async () => {
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_APP_API_URL;
+        const apiUrl = process.env.APP_API_URL;
         const res = await fetch(`${apiUrl}/api/labels`, { cache: 'no-store' });
         if (!res.ok) throw new Error('Failed to fetch labels');
         const data = await res.json();
