@@ -3,21 +3,35 @@ import { pool } from '../utils/db';
 
 export const getRestaurants = async (req: Request, res: Response) => {
   try {
-    const { cuisine, budget } = req.query;
+    const { mlabel_id, slabel_id, eat_in, name } = req.query;
 
-    let query = `SELECT * FROM restaurants`;
+    let query = `SELECT * FROM restaurant`;
     const values: any[] = [];
-
     const conditions: string[] = [];
 
-    // if (cuisine) {
-    //   conditions.push(`type = $${values.length + 1}`);
-    //   values.push(cuisine);
-    // }
+    if (mlabel_id) {
+      conditions.push(`mlabel_id = $${values.length + 1}`);
+      values.push(Number(mlabel_id));
+    }
 
-    // if (conditions.length > 0) {
-    //   query += ` WHERE ` + conditions.join(' AND ');
-    // }
+    if (slabel_id) {
+      conditions.push(`slabel_id = $${values.length + 1}`);
+      values.push(Number(slabel_id));
+    }
+
+    if (eat_in !== undefined) {
+      conditions.push(`eat_in = $${values.length + 1}`);
+      values.push(eat_in === 'true');
+    }
+
+    if (name) {
+      conditions.push(`name ILIKE $${values.length + 1}`);
+      values.push(`%${name}%`);
+    }
+
+    if (conditions.length > 0) {
+      query += ` WHERE ` + conditions.join(' AND ');
+    }
 
     const result = await pool.query(query, values);
     res.json(result.rows);
