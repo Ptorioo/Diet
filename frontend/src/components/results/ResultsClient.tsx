@@ -80,6 +80,7 @@ export default function ResultsClient({ searchParams }: ResultsPageProps) {
             type: restaurant.type || preference,
             latitude: restaurant.latitude || 'Unknown Latitude',
             longitude: restaurant.longitude || 'Unknown Longitude',
+            travel_time_seconds: restaurant.travel_time_seconds || 0,
           }))
         );
         const fetchedWeather = await fetchWeather(coords.lat.toString(), coords.lon.toString());

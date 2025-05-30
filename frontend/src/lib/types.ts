@@ -7,7 +7,7 @@ export interface Restaurant {
   type: string; 
   latitude: string;
   longitude: string;
-  score?: number; 
+  travel_time_seconds?: number;
 }
 
 export interface RestaurantPreference {

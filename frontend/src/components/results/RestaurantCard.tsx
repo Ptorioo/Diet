@@ -1,8 +1,8 @@
 import Image from 'next/image';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import type { Restaurant } from '@/lib/types';
-import { Star, Sun, CloudRain, Zap, MapPin } from 'lucide-react';
+import { Footprints, Sun, CloudRain, Zap, MapPin } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface RestaurantCardProps {
@@ -10,6 +10,13 @@ interface RestaurantCardProps {
   isTopPick: boolean;
   weather: string; // To give context for seating
 }
+
+const formatTravelTime = (seconds?: number) => {
+  if (typeof seconds !== 'number' || isNaN(seconds)) return null;
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${mins} min${mins !== 1 ? 's' : ''}${secs > 0 ? ` ${secs} sec${secs !== 1 ? 's' : ''}` : ''}`;
+};
 
 const RestaurantCard = ({ restaurant, isTopPick, weather }: RestaurantCardProps) => {
   const weatherNorm = weather.toLowerCase(); //Normalized weather
@@ -61,6 +68,12 @@ const RestaurantCard = ({ restaurant, isTopPick, weather }: RestaurantCardProps)
             >
               {Number(restaurant.latitude).toFixed(4)}, {Number(restaurant.longitude).toFixed(4)}
             </a>
+          </div>
+        )}
+        {restaurant.travel_time_seconds !== undefined && (
+          <div className="flex items-center space-x-2 text-muted-foreground">
+            <Footprints className="w-5 h-5" />
+            <span className="font-semibold">{formatTravelTime(restaurant.travel_time_seconds)}</span>
           </div>
         )}
       </CardContent>
