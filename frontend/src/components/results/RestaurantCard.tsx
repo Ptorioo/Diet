@@ -34,10 +34,15 @@ const RestaurantCard = ({ restaurant, isTopPick, weather }: RestaurantCardProps)
     )}>
       <div className="relative w-full h-48 sm:h-56">
         <Image
-          src={`https://placehold.co/600x400.png`}
+          src={
+            Math.random() < 0.1
+              ? "https://media1.tenor.com/m/x8v1oNUOmg4AAAAC/rickroll-roll.gif"
+              : "https://placehold.co/600x400.png"
+          }
           alt={restaurant.name}
           fill
           className="object-cover"
+          unoptimized
         />
         {isTopPick && (
           <Badge variant="default" className="absolute top-3 right-3 bg-accent text-accent-foreground shadow-md">

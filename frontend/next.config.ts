@@ -1,7 +1,6 @@
 import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
-  /* config options here */
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -12,17 +11,11 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'placehold.co',
+        hostname: '**',
         port: '',
         pathname: '/**',
       },
     ],
-  },
-  experimental: {
-    // Required for Geist font if not using Turbopack or if issues arise
-    // fontLoaders: [
-    //   { loader: '@next/font/google', options: { subsets: ['latin'] } },
-    // ],
   },
 };
 
