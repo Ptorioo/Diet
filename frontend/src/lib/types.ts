@@ -8,6 +8,7 @@ export interface Restaurant {
   latitude: string;
   longitude: string;
   travel_time_seconds?: number;
+  image?: string;
 }
 
 export interface RestaurantPreference {

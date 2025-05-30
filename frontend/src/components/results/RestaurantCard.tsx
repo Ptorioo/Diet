@@ -1,9 +1,9 @@
-import Image from 'next/image';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Restaurant } from '@/lib/types';
-import { Footprints, Sun, CloudRain, Zap, MapPin } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { CloudRain, Footprints, MapPin, Sun, Zap } from 'lucide-react';
+import Image from 'next/image';
 
 interface RestaurantCardProps {
   restaurant: Restaurant;
@@ -37,7 +37,7 @@ const RestaurantCard = ({ restaurant, isTopPick, weather }: RestaurantCardProps)
           src={
             Math.random() < 0.1
               ? "https://media1.tenor.com/m/x8v1oNUOmg4AAAAC/rickroll-roll.gif"
-              : "https://placehold.co/600x400.png"
+              : restaurant.image || 'https://content.jerrymk.uk/-ikX37xTjNo'
           }
           alt={restaurant.name}
           fill

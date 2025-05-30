@@ -7,7 +7,7 @@ const HeroSection = () => {
     <section className="relative bg-gradient-to-br from-primary/10 via-background to-background py-20 md:py-32">
       <div className="absolute inset-0 opacity-50">
          <Image 
-            src="/pexels-food-1.jpg"
+            src="https://content.jerrymk.uk/-AzkLRnW2n2"
             alt="Assortment of delicious food"
             fill
             className="opacity-20 object-cover"
