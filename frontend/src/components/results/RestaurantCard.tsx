@@ -1,9 +1,9 @@
-import Image from 'next/image';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Restaurant } from '@/lib/types';
-import { Footprints, Sun, CloudRain, Zap, MapPin } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { CloudRain, Footprints, MapPin, Sun, Zap } from 'lucide-react';
+import Image from 'next/image';
 
 interface RestaurantCardProps {
   restaurant: Restaurant;
@@ -33,12 +33,12 @@ const RestaurantCard = ({ restaurant, isTopPick, weather }: RestaurantCardProps)
       isTopPick ? "border-2 border-primary bg-primary/5" : "bg-card"
     )}>
       <div className="relative w-full h-48 sm:h-56">
-        <Image
-          src={`https://placehold.co/600x400.png`}
-          alt={restaurant.name}
-          fill
-          className="object-cover"
-        />
+      <Image
+        src={restaurant.image || 'https://content.jerrymk.uk/-ikX37xTjNo'}
+        alt={restaurant.name}
+        fill
+        className="object-cover"
+      />
         {isTopPick && (
           <Badge variant="default" className="absolute top-3 right-3 bg-accent text-accent-foreground shadow-md">
             <Zap className="w-4 h-4 mr-1" /> Top Pick
