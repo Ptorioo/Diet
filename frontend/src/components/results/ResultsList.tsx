@@ -1,6 +1,6 @@
 import type { Restaurant } from '@/lib/types';
 import RestaurantCard from './RestaurantCard';
-import { AlertCircle, WifiOff } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 interface ResultsListProps {

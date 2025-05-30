@@ -9,8 +9,11 @@ interface ResultsPageProps {
 }
 
 export default async function ResultsPage({ searchParams }: ResultsPageProps) {
-  const resolvedSearchParams = await searchParams;
-  return (
-    <ResultsClient searchParams={resolvedSearchParams} />
-  );
+  try {
+    const resolvedSearchParams = await searchParams;
+    return <ResultsClient searchParams={resolvedSearchParams} />;
+  } catch (error) {
+    console.error('Failed to resolve search params:', error);
+    return <div>Error loading results</div>;
+  }
 }
