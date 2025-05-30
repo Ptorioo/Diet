@@ -35,7 +35,7 @@ const RestaurantCard = ({ restaurant, isTopPick, weather }: RestaurantCardProps)
       <div className="relative w-full h-48 sm:h-56">
         <Image
           src={
-            Math.random() < 0.1
+            Math.random() < 0.001 // 0.1% chance to show Rickroll
               ? "https://media1.tenor.com/m/x8v1oNUOmg4AAAAC/rickroll-roll.gif"
               : restaurant.image || 'https://content.jerrymk.uk/-ikX37xTjNo'
           }
