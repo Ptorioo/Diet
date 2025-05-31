@@ -1,6 +1,6 @@
-import HeroSection from '@/components/landing/HeroSection';
 import FeatureCard from '@/components/landing/FeatureCard';
-import { CheckCircle2, CloudSun, Award } from 'lucide-react';
+import HeroSection from '@/components/landing/HeroSection';
+import { Award, CheckCircle2, CloudSun } from 'lucide-react';
 
 export default function LandingPage() {
   return (
@@ -9,7 +9,7 @@ export default function LandingPage() {
       <section className="py-16 lg:py-24 bg-background">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold text-center mb-4 text-foreground sm:text-4xl">
-            Why Choose <span className="text-primary">Diet</span>?
+            Why Choose <span className="text-primary">Dietogether</span>?
           </h2>
           <p className="text-center text-muted-foreground mb-12 md:mb-16 max-w-2xl mx-auto">
             Discover a smarter way to dine. We blend your preferences with real-time conditions to suggest the perfect spot.

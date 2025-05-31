@@ -1,13 +1,13 @@
-import type {Metadata} from 'next';
-import {GeistSans} from 'geist/font/sans';
-import './globals.css';
-import { Toaster } from "@/components/ui/toaster";
-import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import Header from '@/components/layout/Header';
+import { Toaster } from "@/components/ui/toaster";
 import { cn } from '@/lib/utils';
+import { GeistSans } from 'geist/font/sans';
+import type { Metadata } from 'next';
+import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Diet - Find Your Next Meal',
+  title: 'Dietogether - Find Your Next Meal',
   description: 'Intelligent restaurant recommendations tailored to your cravings and the weather.',
   manifest: '/manifest.json',
   icons: {

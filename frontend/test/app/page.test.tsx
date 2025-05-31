@@ -1,7 +1,6 @@
-import React from 'react';
+import LandingPage from '@/app/page';
 import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
-import LandingPage from '@/app/page';
 
 jest.mock('@/components/landing/HeroSection', () => {
   const React = require('react');
@@ -26,7 +25,7 @@ describe('LandingPage', () => {
   it('renders the main heading', () => {
     render(<LandingPage />);
     expect(screen.getByText(/Why Choose/i)).toBeInTheDocument();
-    expect(screen.getByText(/Diet/i)).toBeInTheDocument();
+    expect(screen.getByText(/Dietogether/i)).toBeInTheDocument();
   });
 
   it('renders all FeatureCards with correct titles', () => {

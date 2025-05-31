@@ -1,7 +1,7 @@
 {
-  "name": "Diet - Find Your Next Meal",
-  "short_name": "Diet",
-  "description": "Diet - Find Your Next Meal",
+  "name": "Dietogether - Find Your Next Meal",
+  "short_name": "Dietogether",
+  "description": "Dietogether - Find Your Next Meal",
   "start_url": "/",
   "display": "standalone",
   "scope": "/",

@@ -1,4 +1,4 @@
-# **App Name**: Diet
+# **App Name**: Dietogether
 
 ## Core Features:
 

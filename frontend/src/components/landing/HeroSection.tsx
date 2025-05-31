@@ -1,6 +1,6 @@
-import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
+import Link from 'next/link';
 
 const HeroSection = () => {
   return (
@@ -16,7 +16,7 @@ const HeroSection = () => {
       </div>
       <div className="container relative mx-auto px-4 text-center">
         <h1 className="text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl md:text-6xl lg:text-7xl">
-          Diet
+          Dietogether
         </h1>
         <p className="mt-6 max-w-2xl mx-auto text-lg text-muted-foreground sm:text-xl md:text-2xl">
           Your next favorite meal, decided intelligently. Let us find the perfect restaurant for your cravings and today's weather.
