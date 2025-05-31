@@ -202,14 +202,14 @@ export default function SelectPreferencesPage() {
           disabled={!canSwipe || swipeInProgress}
           style={{ backgroundColor: '#f44336', color: 'white', padding: '10px 20px', borderRadius: '5px' }}
         >
-          Nope 😪
+          ㄜ 不要 😑
         </button>
         <button
           onClick={() => swipe('right')}
           disabled={!canSwipe || swipeInProgress}
           style={{ backgroundColor: '#4caf50', color: 'white', padding: '10px 20px', borderRadius: '5px' }}
         >
-          Sure 😋
+          吃 都吃 😋
         </button>
       </div>
     </>
