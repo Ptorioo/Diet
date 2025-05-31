@@ -166,7 +166,7 @@ export default function SelectPreferencesPage() {
   const offset = circumference - (timer / initialTime) * circumference;
 
   return (
-    <>
+    <div className="overflow-hidden">
       {timerActive && (
         <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
           <svg width={radius * 2} height={radius * 2} viewBox={`0 0 ${radius * 2} ${radius * 2}`}>
@@ -222,6 +222,6 @@ export default function SelectPreferencesPage() {
           吃 都吃 😋
         </button>
       </div>
-    </>
+    </div>
   );
 }
