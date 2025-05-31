@@ -1,4 +1,4 @@
-# Diet
+# Dietogether
 ## Build from Docker
 ```
 docker compose up --build -d
