@@ -121,7 +121,7 @@ export default function SelectPreferencesPage() {
         onSwipe={(dir) => handleSwipe(dir, index)}
         preventSwipe={['up', 'down']}
         swipeRequirementType={"velocity"}
-        swipeThreshold={1.1}
+        swipeThreshold={0.5}
       >
         <div
           style={{
