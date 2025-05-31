@@ -12,6 +12,7 @@ export default function SelectPreferencesPage() {
   const [timerActive, setTimerActive] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(-1); // starts at -1 until data loaded
   const [swipeInProgress, setSwipeInProgress] = useState(false);
+  const selectedPreferencesRef = useRef<string[]>([]);
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const router = useRouter();
@@ -84,19 +85,28 @@ export default function SelectPreferencesPage() {
   const handleSwipe = (direction: string, index: number) => {
     if (direction === 'right') {
       const selected = labels[index];
-      router.push(`/results?preference=${encodeURIComponent(selected.id)}`);
-    } else if (direction === 'left') {
-      const newIndex = index - 1;
-      if (newIndex >= 0) {
-        updateCurrentIndex(newIndex);
-        resetTimer();
-      } else {
-        // All cards swiped left → pick random
+      selectedPreferencesRef.current.push(selected.id);
+      console.log(selectedPreferencesRef.current.join(','));
+    }
+
+    const newIndex = index - 1;
+    if (newIndex >= 0) {
+      updateCurrentIndex(newIndex);
+      resetTimer();
+    } else {
+      // No more cards
+      if (selectedPreferencesRef.current.length === 0) {
+        // Pick a random preference if none were selected
         const randomIndex = Math.floor(Math.random() * labels.length);
         const randomPreference = labels[randomIndex];
         router.push(`/results?preference=${encodeURIComponent(randomPreference.id)}`);
+      } else {
+        // Navigate with selected preferences
+        const query = selectedPreferencesRef.current.join(',');
+        router.push(`/results?preference=${encodeURIComponent(query)}`);
       }
     }
+
     setSwipeInProgress(false);
   };
 
@@ -121,7 +131,7 @@ export default function SelectPreferencesPage() {
         onSwipe={(dir) => handleSwipe(dir, index)}
         preventSwipe={['up', 'down']}
         swipeRequirementType={"velocity"}
-        swipeThreshold={0.5}
+        swipeThreshold={0.4}
       >
         <div
           style={{
