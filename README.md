@@ -1,14 +1,15 @@
-# Diet
-
-This is a NextJS project.
-
-Run `npm install` to install dependencies.
-
-Run dev build with `npm run dev`.
-
-Build and run production build with:
-
+# Dietogether
+## Build from Docker
 ```
-next build
-next start
+docker compose up --build -d
+```
+## Dev Build
+```
+npm install
+npm run dev
+```
+## Front-End Production Build
+```
+npm run build
+npm run start
 ```
