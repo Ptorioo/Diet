@@ -28,7 +28,7 @@ const ResultsList = ({ restaurants, weather, preference }: ResultsListProps) => 
   return (
     <div className="container mx-auto px-4 py-8 sm:py-12">
       <div className="mb-8 md:mb-12 text-center">
-        <h2 className="text-3xl font-bold text-foreground sm:text-4xl">Your Top Restaurant Picks!</h2>
+        <h2 className="text-3xl font-bold text-foreground sm:text-4xl">為您推薦以下餐廳！</h2>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
