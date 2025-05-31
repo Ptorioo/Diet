@@ -16,3 +16,21 @@ export interface RestaurantPreference {
   label_name: string;
   icon?: LucideIcon;
 }
+
+export interface WeatherConditions {
+  temp: number;
+  feelslike: number;
+  humidity: number;
+  conditions: string;
+  icon: string;
+}
+
+export interface UserLocation {
+  lat: number;
+  lon: number;
+}
+
+export interface RestaurantsResponse {
+  weather: WeatherConditions;
+  restaurants: Restaurant[];
+}

@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { pool } from '../utils/db';
 import getTravelTimes from '../utils/routeMatrix';
-import { fetchWeather } from '../utils/weather';
+import { fetchWeather, WeatherConditions } from '../utils/weather';
 
 const BAD_WEATHER_KEYWORDS = ['rain', 'snow', 'storm', 'thunder', 'drizzle', 'fog'];
 
@@ -25,7 +25,7 @@ export const getRestaurants = async (req: Request, res: Response) => {
       const mlabelIds = Array.isArray(mlabel_id)
         ? mlabel_id.map(Number)
         : mlabel_id.toString().split(',').map(Number);
-      
+
       const placeholders = mlabelIds.map((_, i) => `$${values.length + i + 1}`);
       conditions.push(`mlabel_id IN (${placeholders.join(', ')})`);
       values.push(...mlabelIds);
@@ -53,6 +53,15 @@ export const getRestaurants = async (req: Request, res: Response) => {
     const dbResult = await pool.query(query, values);
     let restaurants = dbResult.rows;
 
+    let weather: WeatherConditions = {
+      temp: 0,
+      feelslike: 0,
+      humidity: 0,
+      conditions: 'unknown',
+      icon: 'unknown',
+    };
+    let isBadWeather = false;
+
     if (origin_lat && origin_lng) {
       const origin = {
         latitude: parseFloat(origin_lat as string),
@@ -72,15 +81,19 @@ export const getRestaurants = async (req: Request, res: Response) => {
         | 'BICYCLE'
         | 'TRANSIT';
 
-      let isBadWeather = false;
-      let weather = '';
-
       try {
-        // Fetch weather for user's location
         weather = await fetchWeather(origin.latitude, origin.longitude);
         isBadWeather = BAD_WEATHER_KEYWORDS.some(k =>
-          weather.toLowerCase().includes(k)
+          weather.conditions?.toLowerCase().includes(k)
         );
+
+        weather = {
+          temp: weather.temp ?? 0,
+          feelslike: weather.feelslike ?? 0,
+          humidity: weather.humidity ?? 0,
+          conditions: weather.conditions ?? 'unknown',
+          icon: weather.icon ?? 'unknown',
+        };
 
         console.log(`User weather at (${origin.latitude}, ${origin.longitude}): ${weather}, Bad: ${isBadWeather}`);
       } catch (err) {
@@ -99,13 +112,17 @@ export const getRestaurants = async (req: Request, res: Response) => {
             td.duration &&
             restaurants[idx]
           ) {
-            const seconds = parseInt(td.duration.replace('s', ''), 10);
-            restaurants[idx].travel_time_seconds = seconds;
-            restaurants[idx].weather = weather;
+            const durationMatch = td.duration.match(/\d+/);
+            const seconds = durationMatch ? parseInt(durationMatch[0], 10) : null;
 
-            if (isBadWeather) {
-              restaurants[idx].travel_time_seconds += 600; // Apply penalty globally
-              restaurants[idx].weather_penalty_applied = true;
+            if (seconds !== null) {
+              restaurants[idx].travel_time_seconds = seconds;
+              restaurants[idx].weather = weather;
+
+              if (isBadWeather) {
+                restaurants[idx].travel_time_seconds += 600; // 10-minute penalty
+                restaurants[idx].weather_penalty_applied = true;
+              }
             }
           }
         });
@@ -118,7 +135,10 @@ export const getRestaurants = async (req: Request, res: Response) => {
       }
     }
 
-    res.json(restaurants);
+    res.json({
+      weather,
+      restaurants,
+    });
   } catch (error) {
     console.error('Error fetching restaurants:', error);
     res.status(500).json({ error: 'Internal server error' });

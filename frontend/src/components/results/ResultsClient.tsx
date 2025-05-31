@@ -1,10 +1,9 @@
 'use client';
-import { useEffect, useState } from 'react';
-import { useUserLocation } from '@/lib/useUserLocation';
-import type { Restaurant } from '@/lib/types';
 import LoadingResults from '@/app/results/loading';
-import { MOCK_WEATHER_CONDITIONS } from '@/lib/mockData';
 import ResultsList from '@/components/results/ResultsList';
+import type { Restaurant, RestaurantsResponse } from '@/lib/types';
+import { useUserLocation } from '@/lib/useUserLocation';
+import { useEffect, useState } from 'react';
 
 const DEFAULT_LOCATION = { lat: 25.0182544, lon: 121.5354438 };
 
@@ -19,7 +18,7 @@ async function fetchRestaurants(
   preferenceId: string,
   lat: number,
   lon: number
-): Promise<Restaurant[]> {
+): Promise<RestaurantsResponse> {
   const apiUrl = process.env.NEXT_PUBLIC_APP_API_URL;
   const query =
     preferenceId && preferenceId !== '12'
@@ -30,33 +29,8 @@ async function fetchRestaurants(
     throw new Error('Failed to fetch restaurants');
   }
   const data = await res.json();
+  console.log('Fetched restaurants:', data);
   return data;
-}
-
-// Helper to fetch weather from API
-async function fetchWeather(lat: string, lon: string): Promise<string> {
-  try {
-    const apiKey = process.env.NEXT_PUBLIC_VISUALCROSSING_API_KEY;
-    if (!apiKey) throw new Error('Missing Visual Crossing API key');
-    const url = `https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${encodeURIComponent(
-      lat
-    )},${encodeURIComponent(
-      lon
-    )}/today?unitGroup=metric&include=current,days&key=${apiKey}&contentType=json`;
-
-    const res = await fetch(url, { cache: 'no-store' });
-    if (!res.ok) throw new Error('Failed to fetch weather');
-    const data = await res.json();
-
-    return (
-      data.currentConditions?.conditions ||
-      data.days?.[0]?.conditions ||
-      MOCK_WEATHER_CONDITIONS[0]
-    );
-  } catch (error) {
-    console.error('Error fetching weather:', error);
-    return MOCK_WEATHER_CONDITIONS[Math.floor(Math.random() * MOCK_WEATHER_CONDITIONS.length)];
-  }
 }
 
 export default function ResultsClient({ searchParams }: ResultsPageProps) {
@@ -72,7 +46,15 @@ export default function ResultsClient({ searchParams }: ResultsPageProps) {
         const preference = searchParams.preference || '12';
         const coords = error ? DEFAULT_LOCATION : location;
         if (!coords) return;
-        const fetchedRestaurants = await fetchRestaurants(preference, coords.lat, coords.lon);
+        const response = await fetchRestaurants(preference, coords.lat, coords.lon);
+        const fetchedRestaurants = response.restaurants || [];
+        const fetchedWeather = response.weather || {
+          temp: 0,
+          feelslike: 0,
+          humidity: 0,
+          conditions: 'Unknown',
+          icon: 'unknown',
+        };
         setRestaurants(
           fetchedRestaurants.map((restaurant) => ({
             ...restaurant,
@@ -83,8 +65,7 @@ export default function ResultsClient({ searchParams }: ResultsPageProps) {
             travel_time_seconds: restaurant.travel_time_seconds || 0,
           }))
         );
-        const fetchedWeather = await fetchWeather(coords.lat.toString(), coords.lon.toString());
-        setWeather(fetchedWeather);
+        setWeather(fetchedWeather.conditions || 'Unknown');
       } catch (err) {
         console.error('Error fetching data:', err);
       } finally {
