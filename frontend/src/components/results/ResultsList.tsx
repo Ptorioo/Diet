@@ -41,7 +41,7 @@ const ResultsList = ({ restaurants, condition, feelslike }: ResultsListProps) =>
         </h3>
         <br></br>
         <h2 className="text-3xl font-bold text-foreground sm:text-4xl">
-          根據天氣，為您推薦以下餐廳！
+          考量交通時間與天氣，為您推薦以下餐廳！
         </h2>
       </div>
 
