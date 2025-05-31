@@ -35,7 +35,8 @@ async function fetchRestaurants(
 
 export default function ResultsClient({ searchParams }: ResultsPageProps) {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
-  const [weather, setWeather] = useState<string>('');
+  const [condition, setCondition] = useState<string>('');
+  const [feelslike, setFeelslike] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const { location, error } = useUserLocation();
 
@@ -65,7 +66,8 @@ export default function ResultsClient({ searchParams }: ResultsPageProps) {
             travel_time_seconds: restaurant.travel_time_seconds || 0,
           }))
         );
-        setWeather(fetchedWeather.conditions || 'Unknown');
+        setCondition(fetchedWeather.conditions || 'Unknown');
+        setFeelslike(fetchedWeather.feelslike || NaN);
       } catch (err) {
         console.error('Error fetching data:', err);
       } finally {
@@ -82,8 +84,8 @@ export default function ResultsClient({ searchParams }: ResultsPageProps) {
   return (
     <ResultsList
       restaurants={restaurants}
-      weather={weather}
-      preference={searchParams.preference || '12'}
+      condition={condition}
+      feelslike={feelslike}
     />
   );
 }
