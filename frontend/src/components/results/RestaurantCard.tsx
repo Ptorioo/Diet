@@ -15,7 +15,7 @@ const formatTravelTime = (seconds?: number) => {
   if (typeof seconds !== 'number' || isNaN(seconds)) return null;
   const mins = Math.floor(seconds / 60);
   const secs = seconds % 60;
-  return `${mins} min${mins !== 1 ? 's' : ''}${secs > 0 ? ` ${secs} sec${secs !== 1 ? 's' : ''}` : ''}`;
+  return `${mins} 分 ${secs > 0 ? ` ${secs} 秒` : ''}`;
 };
 
 const RestaurantCard = ({ restaurant, isTopPick, weather }: RestaurantCardProps) => {
@@ -23,7 +23,7 @@ const RestaurantCard = ({ restaurant, isTopPick, weather }: RestaurantCardProps)
   let seatingAdvantage = "";
   if (!restaurant.eat_in) {
     if (weatherNorm.includes("rain") || weatherNorm.includes("drizzle")) {
-      seatingAdvantage = "No indoor seating, might be troublesome for rainy days.";
+      seatingAdvantage = "不能內用，雨天很不方便😢";
     }
   }
 
@@ -46,7 +46,7 @@ const RestaurantCard = ({ restaurant, isTopPick, weather }: RestaurantCardProps)
         />
         {isTopPick && (
           <Badge variant="default" className="absolute top-3 right-3 bg-accent text-accent-foreground shadow-md">
-            <Zap className="w-4 h-4 mr-1" /> Top Pick
+            <Zap className="w-4 h-4 mr-1" /> 最推
           </Badge>
         )}
       </div>
@@ -59,7 +59,7 @@ const RestaurantCard = ({ restaurant, isTopPick, weather }: RestaurantCardProps)
             <Sun className="w-5 h-5 text-green-600" /> : 
             <CloudRain className="w-5 h-5 text-blue-500" />
           }
-          <span>{restaurant.eat_in ? 'Indoor Seating Available' : 'Indoor Seating Not Available'}</span>
+          <span>{restaurant.eat_in ? '提供內用' : '只能外帶'}</span>
         </div>
         {seatingAdvantage && <p className="text-xs text-primary">{seatingAdvantage}</p>}
         {restaurant.latitude !== undefined && restaurant.longitude !== undefined && (
@@ -71,7 +71,7 @@ const RestaurantCard = ({ restaurant, isTopPick, weather }: RestaurantCardProps)
               rel="noopener noreferrer"
               className="underline hover:text-primary"
             >
-              {Number(restaurant.latitude).toFixed(4)}, {Number(restaurant.longitude).toFixed(4)}
+              點我看 Google Maps 位置
             </a>
           </div>
         )}

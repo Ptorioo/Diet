@@ -19,11 +19,12 @@ const HeroSection = () => {
           Dietogether
         </h1>
         <p className="mt-6 max-w-2xl mx-auto text-lg text-muted-foreground sm:text-xl md:text-2xl">
-          Your next favorite meal, decided intelligently. Let us find the perfect restaurant for your cravings and today's weather.
+          又犯餐廳選擇障礙了？ <br></br>
+          用交通時間和天氣幫你做出選擇，下一餐不用再煩惱！
         </p>
         <div className="mt-10">
           <Button asChild size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground px-10 py-6 text-lg rounded-full shadow-lg transition-transform hover:scale-105">
-            <Link href="/select-preferences">Find My Next Meal</Link>
+            <Link href="/select-preferences">那麼，吃啥好呢？</Link>
           </Button>
         </div>
       </div>
