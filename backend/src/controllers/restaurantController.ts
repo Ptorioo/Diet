@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { pool } from '../utils/db';
 import getTravelTimes from '../utils/routeMatrix';
-import { fetchWeather } from '../utils/weather'; // make sure this is implemented
+import { fetchWeather } from '../utils/weather';
 
 const BAD_WEATHER_KEYWORDS = ['rain', 'snow', 'storm', 'thunder', 'drizzle', 'fog'];
 
@@ -72,43 +72,43 @@ export const getRestaurants = async (req: Request, res: Response) => {
         | 'BICYCLE'
         | 'TRANSIT';
 
+      let isBadWeather = false;
+      let weather = '';
+
+      try {
+        // Fetch weather for user's location
+        weather = await fetchWeather(origin.latitude, origin.longitude);
+        isBadWeather = BAD_WEATHER_KEYWORDS.some(k =>
+          weather.toLowerCase().includes(k)
+        );
+
+        console.log(`User weather at (${origin.latitude}, ${origin.longitude}): ${weather}, Bad: ${isBadWeather}`);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        console.warn('Weather fetch failed for user location:', message);
+      }
+
       try {
         const travelData = await getTravelTimes(origin, destinations, travelMode);
         console.log('Travel data:', travelData);
 
-        await Promise.all(
-          travelData.map(async (td: any) => {
-            const idx = td.destinationIndex;
-            if (
-              typeof idx === 'number' &&
-              td.duration &&
-              restaurants[idx]
-            ) {
-              const seconds = parseInt(td.duration.replace('s', ''), 10);
-              restaurants[idx].travel_time_seconds = seconds;
-        
-              const r = restaurants[idx];
-              try {
-                const weather = await fetchWeather(r.latitude, r.longitude);
-                restaurants[idx].weather = weather;
-        
-                const isBadWeather = BAD_WEATHER_KEYWORDS.some(k =>
-                  weather.toLowerCase().includes(k)
-                );
-        
-                console.log(`Restaurant: ${r.name}, Weather: ${weather}, Bad: ${isBadWeather}`);
-        
-                if (isBadWeather) {
-                  restaurants[idx].travel_time_seconds += 600;
-                  restaurants[idx].weather_penalty_applied = true;
-                }
-              } catch (err) {
-                const message = err instanceof Error ? err.message : String(err);
-                console.warn(`Weather fetch failed for restaurant ${r.name}:`, message);
-              }
+        travelData.forEach((td: any) => {
+          const idx = td.destinationIndex;
+          if (
+            typeof idx === 'number' &&
+            td.duration &&
+            restaurants[idx]
+          ) {
+            const seconds = parseInt(td.duration.replace('s', ''), 10);
+            restaurants[idx].travel_time_seconds = seconds;
+            restaurants[idx].weather = weather;
+
+            if (isBadWeather) {
+              restaurants[idx].travel_time_seconds += 600; // Apply penalty globally
+              restaurants[idx].weather_penalty_applied = true;
             }
-          })
-        );
+          }
+        });
 
         restaurants = restaurants
           .filter((r: any) => typeof r.travel_time_seconds === 'number')

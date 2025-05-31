@@ -1,6 +1,5 @@
-export async function fetchWeather(lat: string, lng: string): Promise<string> {
-    const apiKey =
-      process.env.VISUALCROSSING_API_KEY;
+export async function fetchWeather(lat: number, lng: number): Promise<string> {
+    const apiKey = process.env.VISUALCROSSING_API_KEY;
   
     if (!apiKey) throw new Error('Missing Visual Crossing API key');
   
