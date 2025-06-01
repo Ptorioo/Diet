@@ -2,7 +2,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Restaurant } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { CloudRain, Footprints, MapPin, Sun, Zap } from 'lucide-react';
+import { Bike, CloudRain, Footprints, MapPin, Sun, TrainFront, Zap } from 'lucide-react';
 import Image from 'next/image';
 
 interface RestaurantCardProps {
@@ -75,10 +75,22 @@ const RestaurantCard = ({ restaurant, isTopPick, weather }: RestaurantCardProps)
             </a>
           </div>
         )}
-        {restaurant.travel_time_seconds !== undefined && (
+        {restaurant.travel_time_walk !== undefined && (
           <div className="flex items-center space-x-2 text-muted-foreground">
             <Footprints className="w-5 h-5" />
-            <span className="font-semibold">{formatTravelTime(restaurant.travel_time_seconds)}</span>
+            <span className="font-semibold">{formatTravelTime(restaurant.travel_time_walk)}</span>
+          </div>
+        )}
+        {restaurant.travel_time_bicycle !== undefined && (
+          <div className="flex items-center space-x-2 text-muted-foreground">
+            <Bike className="w-5 h-5" />
+            <span className="font-semibold">{formatTravelTime(restaurant.travel_time_bicycle)}</span>
+          </div>
+        )}
+        {restaurant.travel_time_transit !== undefined && restaurant.travel_time_transit != 0 && (
+          <div className="flex items-center space-x-2 text-muted-foreground">
+            <TrainFront className="w-5 h-5" />
+            <span className="font-semibold">{formatTravelTime(restaurant.travel_time_transit)}</span>
           </div>
         )}
       </CardContent>

@@ -22,8 +22,8 @@ async function fetchRestaurants(
   const apiUrl = process.env.NEXT_PUBLIC_APP_API_URL;
   const query =
     preferenceId && preferenceId !== '12'
-      ? `?mlabel_id=${encodeURIComponent(preferenceId)}&method=walk,bicycle&origin_lat=${lat}&origin_lng=${lon}`
-      : `?mlabel_id=12&method=walk,bicycle&origin_lat=${lat}&origin_lng=${lon}`;
+      ? `?mlabel_id=${encodeURIComponent(preferenceId)}&method=walk,bicycle,transit&origin_lat=${lat}&origin_lng=${lon}`
+      : `?mlabel_id=12&method=walk,bicycle,transit&origin_lat=${lat}&origin_lng=${lon}`;
   const res = await fetch(`${apiUrl}/api/restaurants/${query}`, { cache: 'no-store' });
   if (!res.ok) {
     throw new Error('Failed to fetch restaurants');
@@ -63,7 +63,10 @@ export default function ResultsClient({ searchParams }: ResultsPageProps) {
             type: restaurant.type || preference,
             latitude: restaurant.latitude || 'Unknown Latitude',
             longitude: restaurant.longitude || 'Unknown Longitude',
-            travel_time_seconds: restaurant.travel_time_seconds || 0,
+            travel_time_walk: restaurant.travel_time_walk || 0,
+            travel_time_bicycle: restaurant.travel_time_bicycle || 0,
+            travel_time_transit: restaurant.travel_time_transit || 0,
+            travel_time_drive: restaurant.travel_time_drive || 0, 
           }))
         );
         setCondition(fetchedWeather.conditions || 'Unknown');

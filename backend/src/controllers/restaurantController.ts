@@ -105,7 +105,6 @@ export const getRestaurants = async (req: Request, res: Response) => {
 
       // Initialize travel_times per restaurant
       restaurants.forEach((r: any) => {
-        r.travel_times = {};
         r.weather = weather;
         r.weather_penalty_applied = isBadWeather;
       });
@@ -132,7 +131,8 @@ export const getRestaurants = async (req: Request, res: Response) => {
                 let time = seconds;
                 if (isBadWeather) time += 600; // 10-minute penalty
 
-                restaurants[idx].travel_times[travelMode.toLowerCase()] = time;
+                const modeKey = `travel_time_${travelMode.toLowerCase()}`;
+                restaurants[idx][modeKey] = seconds;
               }
             }
           });

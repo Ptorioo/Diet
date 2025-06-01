@@ -1,10 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
 
-export interface TravelTimes {
-  method: string;
-  seconds: number;
-}
-
 export interface Restaurant {
   id: string;
   name: string;
@@ -12,7 +7,10 @@ export interface Restaurant {
   type: string; 
   latitude: string;
   longitude: string;
-  travel_times?: TravelTimes[];
+  travel_time_walk?: number;
+  travel_time_bicycle?: number;
+  travel_time_transit?: number;
+  travel_time_drive?: number;
   image?: string;
 }
 
