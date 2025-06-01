@@ -1,7 +1,7 @@
-import type { Restaurant } from '@/lib/types';
-import RestaurantCard from './RestaurantCard';
-import { AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import type { Restaurant } from '@/lib/types';
+import { AlertCircle } from 'lucide-react';
+import RestaurantCard from './RestaurantCard';
 
 interface ResultsListProps {
   restaurants: Restaurant[];
@@ -34,7 +34,7 @@ const ResultsList = ({ restaurants, condition, feelslike }: ResultsListProps) =>
         <h3 className="text-2xl text-foreground sm:text-2xl">
           今天{
             rainyWeather? "陰陰雨雨，讓人懶得出門 ☔" : (
-              hotWeather? `熱爆，體感溫度高達${feelslike} 🌡️` :
+              hotWeather? `熱爆，體感溫度高達${feelslike}° 🌡️` :
               "還算舒適，沒雨又不熱 ☺️"
             )
           }
