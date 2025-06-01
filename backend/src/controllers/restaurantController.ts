@@ -25,7 +25,6 @@ export const getRestaurants = async (req: Request, res: Response) => {
       const mlabelIds = Array.isArray(mlabel_id)
         ? mlabel_id.map(Number)
         : mlabel_id.toString().split(',').map(Number);
-
       const placeholders = mlabelIds.map((_, i) => `$${values.length + i + 1}`);
       conditions.push(`mlabel_id IN (${placeholders.join(', ')})`);
       values.push(...mlabelIds);
@@ -75,11 +74,14 @@ export const getRestaurants = async (req: Request, res: Response) => {
           longitude: parseFloat(r.longitude),
         }));
 
-      const travelMode = (method?.toString().toUpperCase() || 'TRANSIT') as
-        | 'WALK'
-        | 'DRIVE'
-        | 'BICYCLE'
-        | 'TRANSIT';
+      // Allow multi-methods
+      const methodList = method
+        ? Array.isArray(method)
+          ? method
+          : method.toString().split(',')
+        : ['TRANSIT'];
+
+      const validMethods = ['WALK', 'DRIVE', 'BICYCLE', 'TRANSIT'];
 
       try {
         weather = await fetchWeather(origin.latitude, origin.longitude);
@@ -95,45 +97,55 @@ export const getRestaurants = async (req: Request, res: Response) => {
           icon: weather.icon ?? 'unknown',
         };
 
-        console.log(`User weather at (${origin.latitude}, ${origin.longitude}): ${weather}, Bad: ${isBadWeather}`);
+        console.log(`User weather at (${origin.latitude}, ${origin.longitude}): ${weather.conditions}, Bad: ${isBadWeather}`);
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
         console.warn('Weather fetch failed for user location:', message);
       }
 
-      try {
-        const travelData = await getTravelTimes(origin, destinations, travelMode);
-        console.log('Travel data:', travelData);
+      // Initialize travel_times per restaurant
+      restaurants.forEach((r: any) => {
+        r.travel_times = {};
+        r.weather = weather;
+        r.weather_penalty_applied = isBadWeather;
+      });
 
-        travelData.forEach((td: any) => {
-          const idx = td.destinationIndex;
-          if (
-            typeof idx === 'number' &&
-            td.duration &&
-            restaurants[idx]
-          ) {
-            const durationMatch = td.duration.match(/\d+/);
-            const seconds = durationMatch ? parseInt(durationMatch[0], 10) : null;
+      for (const methodRaw of methodList) {
+        const travelMode = methodRaw.toString().toUpperCase();
+        if (!validMethods.includes(travelMode)) continue;
 
-            if (seconds !== null) {
-              restaurants[idx].travel_time_seconds = seconds;
-              restaurants[idx].weather = weather;
+        try {
+          const travelData = await getTravelTimes(origin, destinations, travelMode as any);
+          console.log(`Travel data for ${travelMode}:`, travelData);
 
-              if (isBadWeather) {
-                restaurants[idx].travel_time_seconds += 600; // 10-minute penalty
-                restaurants[idx].weather_penalty_applied = true;
+          travelData.forEach((td: any) => {
+            const idx = td.destinationIndex;
+            if (
+              typeof idx === 'number' &&
+              td.duration &&
+              restaurants[idx]
+            ) {
+              const durationMatch = td.duration.match(/\d+/);
+              const seconds = durationMatch ? parseInt(durationMatch[0], 10) : null;
+
+              if (seconds !== null) {
+                let time = seconds;
+                if (isBadWeather) time += 600; // 10-minute penalty
+
+                restaurants[idx].travel_times[travelMode.toLowerCase()] = time;
               }
             }
-          }
-        });
-
-        restaurants = restaurants
-          .filter((r: any) => typeof r.travel_time_seconds === 'number')
-          .sort((a: any, b: any) => a.travel_time_seconds - b.travel_time_seconds);
-      } catch (err) {
-        console.error('Travel time error:', err);
+          });
+        } catch (err) {
+          console.error(`Travel time error for ${travelMode}:`, err);
+        }
       }
-    }
+
+      // Sort by shortest time across all methods
+      // restaurants = restaurants
+      //     .filter((r: any) => typeof r.travel_time_seconds === 'number')
+      //     .sort((a: any, b: any) => a.travel_time_seconds - b.travel_time_seconds);
+    };
 
     res.json({
       weather,

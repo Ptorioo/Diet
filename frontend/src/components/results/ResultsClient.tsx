@@ -22,8 +22,8 @@ async function fetchRestaurants(
   const apiUrl = process.env.NEXT_PUBLIC_APP_API_URL;
   const query =
     preferenceId && preferenceId !== '12'
-      ? `?mlabel_id=${encodeURIComponent(preferenceId)}&method=walk&origin_lat=${lat}&origin_lng=${lon}`
-      : `?mlabel_id=12&method=walk&origin_lat=${lat}&origin_lng=${lon}`;
+      ? `?mlabel_id=${encodeURIComponent(preferenceId)}&method=walk,bicycle&origin_lat=${lat}&origin_lng=${lon}`
+      : `?mlabel_id=12&method=walk,bicycle&origin_lat=${lat}&origin_lng=${lon}`;
   const res = await fetch(`${apiUrl}/api/restaurants/${query}`, { cache: 'no-store' });
   if (!res.ok) {
     throw new Error('Failed to fetch restaurants');
