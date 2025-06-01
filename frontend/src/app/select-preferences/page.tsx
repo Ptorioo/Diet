@@ -86,7 +86,7 @@ export default function SelectPreferencesPage() {
     if (direction === 'right') {
       const selected = labels[index];
       selectedPreferencesRef.current.push(selected.id);
-      console.log(selectedPreferencesRef.current.join(','));
+      // console.log(selectedPreferencesRef.current.join(','));
     }
 
     const newIndex = index - 1;

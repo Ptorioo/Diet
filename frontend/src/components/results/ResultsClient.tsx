@@ -29,7 +29,7 @@ async function fetchRestaurants(
     throw new Error('Failed to fetch restaurants');
   }
   const data = await res.json();
-  console.log('Fetched restaurants:', data);
+  // console.log('Fetched restaurants:', data);
   return data;
 }
 

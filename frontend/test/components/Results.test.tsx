@@ -17,9 +17,20 @@ const mockRestaurants = [
     eat_in: true,
     latitude: '25.0182544',
     longitude: '121.5354438',
-    travel_time_seconds: 300,
+    travel_time_walk: 300,
+    travel_time_bicycle: 200,
+    travel_time_transit: 400,
+    travel_time_drive: 100,
   },
 ];
+
+const mockWeather = {
+  temp: 28,
+  feelslike: 32,
+  humidity: 70,
+  conditions: 'Clear',
+  icon: 'clear-day',
+};
 
 beforeEach(() => {
   global.fetch = jest.fn((url) => {
@@ -34,12 +45,9 @@ beforeEach(() => {
       } as unknown as Response);
 
     if (typeof url === 'string' && url.includes('/api/restaurants/')) {
-      return mockResponse(mockRestaurants);
-    }
-    if (typeof url === 'string' && url.includes('VisualCrossingWebServices')) {
       return mockResponse({
-        currentConditions: { conditions: 'Clear' },
-        days: [{ conditions: 'Clear' }]
+        restaurants: mockRestaurants,
+        weather: mockWeather,
       });
     }
     return Promise.resolve({
@@ -54,14 +62,16 @@ beforeEach(() => {
 });
 
 describe('ResultsClient', () => {
-    it('renders without crashing', async () => {
-        render(<ResultsClient searchParams={{ preference: '1' }} />);
-        await waitFor(() => {
-        expect(screen.getByText(/Your Top Restaurant Picks!/i)).toBeInTheDocument();
-        });
+  it('renders and displays restaurant and weather info', async () => {
+    render(<ResultsClient searchParams={{ preference: '1' }} />);
+    await waitFor(() => {
+      expect(screen.getByText(/考量交通時間與天氣，為您推薦以下餐廳/i)).toBeInTheDocument();
+      expect(screen.getByText(/Test Restaurant/i)).toBeInTheDocument();
+      expect(screen.getByText(/提供內用/i)).toBeInTheDocument();
     });
+  });
 });
 
 afterEach(() => {
-    jest.clearAllMocks();
+  jest.clearAllMocks();
 });
