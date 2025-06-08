@@ -4,7 +4,7 @@ import getTravelTimes from '../utils/routeMatrix';
 import { fetchWeather, WeatherConditions } from '../utils/weather';
 
 const BAD_WEATHER_KEYWORDS = ['rain', 'snow', 'storm', 'thunder', 'drizzle', 'fog'];
-const HOT_WEATHER_CRITERIUM = 35;
+const HOT_WEATHER_CRITERIUM = 30;
 const N_BINS = 5;                  // number of bins to apply in the "number of choice"-based penalty
 const BAD_WEATHER_PENALTY = 300;   // bad weather travel penalty, 5 minutes
 const NO_EATIN_PENALTY = 600;      // no eat-in for bad/hot weathers penalty, 10 minutes
