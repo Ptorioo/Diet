@@ -4,7 +4,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import TinderCard from 'react-tinder-card';
 
-export default function DemoSwipePage() {
+export default function SelectPreferencesDemoPage() {
   const router = useRouter();
   const childRef = useRef<React.RefObject<any>>(React.createRef());
   const [hasSwiped, setHasSwiped] = useState(false);
