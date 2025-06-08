@@ -24,7 +24,7 @@ const HeroSection = () => {
         </p>
         <div className="mt-10">
           <Button asChild size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground px-10 py-6 text-lg rounded-full shadow-lg transition-transform hover:scale-105">
-            <Link href="/select-preferences">那麼，吃啥好呢？</Link>
+            <Link href="/select-preferences-demo">那麼，吃啥好呢？</Link>
           </Button>
         </div>
       </div>
