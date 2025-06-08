@@ -6,10 +6,12 @@ import RestaurantCard from './RestaurantCard';
 interface ResultsListProps {
   restaurants: Restaurant[];
   condition: string;
+  isBadWeather: boolean;
+  isHotWeather: boolean;
   feelslike: number;
 }
 
-const ResultsList = ({ restaurants, condition, feelslike }: ResultsListProps) => {
+const ResultsList = ({ restaurants, condition, isBadWeather, isHotWeather, feelslike }: ResultsListProps) => {
   if (!restaurants || restaurants.length === 0) {
     return (
       <Alert variant="default" className="max-w-2xl mx-auto my-12 border-accent text-accent-foreground bg-accent/10">
@@ -23,18 +25,15 @@ const ResultsList = ({ restaurants, condition, feelslike }: ResultsListProps) =>
   }
 
   // Sort by score, highest first
-  const topPicksCount = 2; // Emphasize top 1 or 2
-  const weatherNorm = condition.toLowerCase();
-  const rainyWeather = (weatherNorm.includes("rain") || weatherNorm.includes("drizzle"))
-  const hotWeather = (feelslike > 30)
+  const topPicksCount = ((isBadWeather || isHotWeather)? 2 : 6);  // Emphasize more when weather is nice
 
   return (
     <div className="container mx-auto px-4 py-8 sm:py-12">
       <div className="mb-8 md:mb-12 text-center">
         <h3 className="text-2xl text-foreground sm:text-2xl">
           今天{
-            rainyWeather? "陰陰雨雨，讓人懶得出門 ☔" : (
-              hotWeather? `熱爆，體感溫度高達${feelslike}° 🌡️` :
+              isBadWeather? "陰陰雨雨，讓人懶得出門 ☔" : (
+              isHotWeather? `熱爆，體感溫度高達${feelslike}° 🌡️` :
               "還算舒適，沒雨又不熱 ☺️"
             )
           }
@@ -51,7 +50,7 @@ const ResultsList = ({ restaurants, condition, feelslike }: ResultsListProps) =>
             key={restaurant.id || restaurant.name} // Prefer ID if available
             restaurant={restaurant}
             isTopPick={index < topPicksCount}
-            weather={condition}
+            isBadWeather={isBadWeather}
           />
         ))}
       </div>

@@ -4,6 +4,11 @@ import getTravelTimes from '../utils/routeMatrix';
 import { fetchWeather, WeatherConditions } from '../utils/weather';
 
 const BAD_WEATHER_KEYWORDS = ['rain', 'snow', 'storm', 'thunder', 'drizzle', 'fog'];
+const HOT_WEATHER_CRITERIUM = 35;
+const N_BINS = 5;                  // number of bins to apply in the "number of choice"-based penalty
+const BAD_WEATHER_PENALTY = 300;   // bad weather travel penalty, 5 minutes
+const NO_EATIN_PENALTY = 600;      // no eat-in for bad/hot weathers penalty, 10 minutes
+const NUM_CHOICE_PENALTY = 60;    // number of choice penalty, 1 minute per group ranking
 
 export const getRestaurants = async (req: Request, res: Response) => {
   try {
@@ -58,8 +63,11 @@ export const getRestaurants = async (req: Request, res: Response) => {
       humidity: 0,
       conditions: 'unknown',
       icon: 'unknown',
+      is_bad_weather: false,
+      is_hot_weather: false
     };
     let isBadWeather = false;
+    let isHotWeather = false;
 
     if (origin_lat && origin_lng) {
       const origin = {
@@ -88,6 +96,7 @@ export const getRestaurants = async (req: Request, res: Response) => {
         isBadWeather = BAD_WEATHER_KEYWORDS.some(k =>
           weather.conditions?.toLowerCase().includes(k)
         );
+        isHotWeather = (weather.feelslike > HOT_WEATHER_CRITERIUM);
 
         weather = {
           temp: weather.temp ?? 0,
@@ -95,19 +104,15 @@ export const getRestaurants = async (req: Request, res: Response) => {
           humidity: weather.humidity ?? 0,
           conditions: weather.conditions ?? 'unknown',
           icon: weather.icon ?? 'unknown',
+          is_bad_weather: isBadWeather,
+          is_hot_weather: isHotWeather
         };
 
-        console.log(`User weather at (${origin.latitude}, ${origin.longitude}): ${weather.conditions}, Bad: ${isBadWeather}`);
+        console.log(`User weather at (${origin.latitude}, ${origin.longitude}): ${weather.conditions}, Bad: ${isBadWeather}. Hot: ${isHotWeather}`);
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
         console.warn('Weather fetch failed for user location:', message);
       }
-
-      // Initialize travel_times per restaurant
-      restaurants.forEach((r: any) => {
-        r.weather = weather;
-        r.weather_penalty_applied = isBadWeather;
-      });
 
       for (const methodRaw of methodList) {
         const travelMode = methodRaw.toString().toUpperCase();
@@ -129,7 +134,7 @@ export const getRestaurants = async (req: Request, res: Response) => {
 
               if (seconds !== null) {
                 let time = seconds;
-                if (isBadWeather) time += 600; // 10-minute penalty
+                if (isBadWeather) time += BAD_WEATHER_PENALTY;
 
                 const modeKey = `travel_time_${travelMode.toLowerCase()}`;
                 restaurants[idx][modeKey] = seconds;
@@ -140,11 +145,70 @@ export const getRestaurants = async (req: Request, res: Response) => {
           console.error(`Travel time error for ${travelMode}:`, err);
         }
       }
+      
+      // COMPUTE TRAFFIC COST
+      if (methodList.length > 0) {
+        const firstMethod = methodList[0].toString().toLowerCase();
+        const sortKey = `travel_time_${firstMethod}`;
+        
+        // Initialize traffic_cost as travel time for each restaurant
+        restaurants.forEach((r: any) => {
+          const travelTime = r[sortKey];
+          // Initally, traffic cost is travel time of the first travel method
+          r.traffic_cost = typeof travelTime === 'number' ? travelTime : Infinity;
+        });
+        
+        // Bin-based "number of choice" penalty
+        if (!isBadWeather && !isHotWeather) {
+          // Sort a copy by traffic_cost to define bins
+          const sortedCopy = [...restaurants].sort((a: any, b: any) => a.traffic_cost - b.traffic_cost);
 
-      // Sort by shortest time across all methods
-      // restaurants = restaurants
-      //     .filter((r: any) => typeof r.travel_time_seconds === 'number')
-      //     .sort((a: any, b: any) => a.travel_time_seconds - b.travel_time_seconds);
+          const groupSize = Math.ceil(restaurants.length / N_BINS);
+          const groupMap = new Map<any, number>(); // restaurant.id -> groupIndex
+
+          sortedCopy.forEach((r, i) => {
+            const groupIndex = Math.floor(i / groupSize);
+            groupMap.set(r.id, groupIndex);
+          });
+
+          // Count how many restaurants are in each group
+          const groupCounts: Record<number, number> = {};
+          for (const groupIndex of groupMap.values()) {
+            groupCounts[groupIndex] = (groupCounts[groupIndex] || 0) + 1;
+          }
+
+          // Sort groups by count (smallest first)
+          const sortedGroups = Object.entries(groupCounts).sort(([, a], [, b]) => a - b);
+
+          // Assign penalties: smaller group gets higher penalty
+          const groupPenalty: Record<number, number> = {};
+          sortedGroups.forEach(([groupIdxStr], i) => {
+            const groupIdx = Number(groupIdxStr);
+            groupPenalty[groupIdx] = NUM_CHOICE_PENALTY * (sortedGroups.length - i);  // largest penalty to smallest group
+          });
+          
+          // Apply group-based penalties
+          restaurants.forEach((r: any) => {
+            const groupIndex = groupMap.get(r.id);
+            if (groupIndex !== undefined && groupPenalty[groupIndex] !== undefined) {
+              r.traffic_cost += groupPenalty[groupIndex];
+            }
+          });
+        }
+
+        // No eat-in penalty
+        restaurants.forEach((r: any) => {
+          // If the weather is hot or it rains, apply penalty to restaurants without eat-in options
+          if ((isHotWeather || isBadWeather) && r.eat_in === false) {
+            r.traffic_cost += NO_EATIN_PENALTY;
+          }
+        });
+        
+        // Sort by traffic_cost
+        restaurants = restaurants
+          .filter((r: any) => typeof r.traffic_cost === 'number')
+          .sort((a: any, b: any) => a.traffic_cost - b.traffic_cost);
+      }
     };
 
     res.json({

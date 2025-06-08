@@ -4,6 +4,8 @@ export interface WeatherConditions {
     humidity: number;
     conditions: string;
     icon: string;
+    is_bad_weather: boolean;
+    is_hot_weather: boolean;
 }
 
 export async function fetchWeather(

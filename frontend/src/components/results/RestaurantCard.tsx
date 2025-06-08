@@ -8,7 +8,7 @@ import Image from 'next/image';
 interface RestaurantCardProps {
   restaurant: Restaurant;
   isTopPick: boolean;
-  weather: string; // To give context for seating
+  isBadWeather: boolean;
 }
 
 const formatTravelTime = (seconds?: number) => {
@@ -18,13 +18,10 @@ const formatTravelTime = (seconds?: number) => {
   return `${mins} 分 ${secs > 0 ? ` ${secs} 秒` : ''}`;
 };
 
-const RestaurantCard = ({ restaurant, isTopPick, weather }: RestaurantCardProps) => {
-  const weatherNorm = weather.toLowerCase(); //Normalized weather
+const RestaurantCard = ({ restaurant, isTopPick, isBadWeather }: RestaurantCardProps) => {
   let seatingAdvantage = "";
-  if (!restaurant.eat_in) {
-    if (weatherNorm.includes("rain") || weatherNorm.includes("drizzle")) {
+  if (!restaurant.eat_in && isBadWeather) {
       seatingAdvantage = "不能內用，雨天很不方便😢";
-    }
   }
 
   return (

@@ -12,6 +12,7 @@ export interface Restaurant {
   travel_time_transit?: number;
   travel_time_drive?: number;
   image?: string;
+  traffic_cost?: number;
 }
 
 export interface RestaurantPreference {
@@ -26,6 +27,8 @@ export interface WeatherConditions {
   humidity: number;
   conditions: string;
   icon: string;
+  is_bad_weather: boolean;
+  is_hot_weather: boolean;
 }
 
 export interface UserLocation {
