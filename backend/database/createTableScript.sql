@@ -22,6 +22,7 @@ CREATE TABLE RESTAURANT (
     latitude DECIMAL(12, 8) NOT NULL,
     longitude DECIMAL(12, 8) NOT NULL,
     eat_in BOOLEAN NOT NULL,
+    image VARCHAR(150),
     FOREIGN KEY (mlabel_id, slabel_id) REFERENCES SECONDARY_LABEL(mlabel_id, slabel_id)
         ON UPDATE CASCADE
         ON DELETE SET NULL
