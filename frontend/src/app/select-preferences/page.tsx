@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import TinderCard from 'react-tinder-card';
 import type { RestaurantPreference } from '@/lib/types';
 
@@ -19,6 +19,8 @@ export default function SelectPreferencesPage() {
   const currentIndexRef = useRef(currentIndex);
   const childRefs = useRef<React.RefObject<any>[]>([]);
 
+  const searchParams = useSearchParams();
+
   // Fetch labels
   useEffect(() => {
     const fetchLabels = async () => {
@@ -26,25 +28,34 @@ export default function SelectPreferencesPage() {
         const apiUrl = process.env.NEXT_PUBLIC_APP_API_URL;
         const res = await fetch(`${apiUrl}/api/labels`, { cache: 'no-store' });
         if (!res.ok) throw new Error('Failed to fetch labels');
-        const data = await res.json();
+        const data: RestaurantPreference[] = await res.json();
 
-        // shuffle data
-        for (let i = data.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [data[i], data[j]] = [data[j], data[i]];
+        // Get query param
+        const prefParam = searchParams.get('preference');
+        let filteredData = data;
+
+        if (prefParam) {  // filter for selected labels if preference parameter is given
+          const prefIds = prefParam.split(',').map((id) => id.trim());
+          filteredData = data.filter((item) => prefIds.includes(item.id.toString()));
         }
 
-        setLabels(data);
-        setCurrentIndex(data.length - 1);
-        currentIndexRef.current = data.length - 1;
-        childRefs.current = Array(data.length).fill(0).map(() => React.createRef());
+        // Shuffle
+        for (let i = filteredData.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [filteredData[i], filteredData[j]] = [filteredData[j], filteredData[i]];
+        }
+
+        setLabels(filteredData);
+        setCurrentIndex(filteredData.length - 1);
+        currentIndexRef.current = filteredData.length - 1;
+        childRefs.current = Array(filteredData.length).fill(0).map(() => React.createRef());
       } catch (err) {
         console.error('Error fetching labels:', err);
         setLabels([]);
       }
     };
     fetchLabels();
-  }, []);
+  }, [searchParams]);
 
   // Timer logic
   useEffect(() => {
