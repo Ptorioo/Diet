@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import SelectPreferencesPage from '@/app/select-preferences/page';
+import SelectPreferencesClient from '@/components/preferences/SelectPreferencesClient';
 
 // Mock next/navigation for router.push
 jest.mock('next/navigation', () => {
@@ -14,7 +14,7 @@ jest.mock('next/navigation', () => {
   };
 });
 
-// Mock react-tinder-card to just render children and call onSwipe when needed
+// Mock react-tinder-card to just render children and simulate swipe
 jest.mock('react-tinder-card', () => {
   const React = require('react');
   return React.forwardRef(
@@ -44,60 +44,67 @@ global.fetch = jest.fn(() =>
   })
 ) as jest.Mock;
 
-describe('SelectPreferencesPage', () => {
+describe('SelectPreferencesClient', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('renders timer and cards', async () => {
-    render(<SelectPreferencesPage />);
+    render(<SelectPreferencesClient searchParams={{ preference: undefined }} />);
+    
+    // Timer initial value should show up
     expect(screen.getByText('3')).toBeInTheDocument();
+
     await waitFor(() => {
       expect(screen.getAllByTestId('tinder-card').length).toBeGreaterThan(0);
     });
+
+    // Labels should render on cards
     expect(screen.getByText('Italian')).toBeInTheDocument();
     expect(screen.getByText('Mexican')).toBeInTheDocument();
   });
 
   it('calls router.push with selected preference after right swipe', async () => {
-    const { push } = require('next/navigation');
-    render(<SelectPreferencesPage />);
+    const { push } = require('next/navigation').useRouter();
+
+    render(<SelectPreferencesClient searchParams={{ preference: undefined }} />);
+
     await waitFor(() => {
       expect(screen.getAllByTestId('tinder-card').length).toBeGreaterThan(0);
     });
 
-    // Click the right swipe button twice to finish all cards
     const rightButton = screen.getByText('吃 都吃 😋');
-    fireEvent.click(rightButton); // Swipe right on first card
-    fireEvent.click(rightButton); // Swipe right on second card
+
+    // Swipe right twice to select both cards
+    fireEvent.click(rightButton);
+    fireEvent.click(rightButton);
 
     await waitFor(() => {
       expect(push).toHaveBeenCalled();
-      // The query string should include both ids (URL-encoded)
+      // Preference query includes both ids (order can vary)
       expect(push.mock.calls[0][0]).toMatch(/preference=(1%2C2|2%2C1)/);
     });
   });
 
   it('calls router.push with random preference if none selected', async () => {
-    const { push } = require('next/navigation');
-    render(<SelectPreferencesPage />);
+    const { push } = require('next/navigation').useRouter();
+
+    render(<SelectPreferencesClient searchParams={{ preference: undefined }} />);
+
     await waitFor(() => {
       expect(screen.getAllByTestId('tinder-card').length).toBeGreaterThan(0);
     });
 
-    // Click the left swipe button twice to finish all cards
     const leftButton = screen.getByText('ㄜ 不要 😑');
-    fireEvent.click(leftButton); // Swipe left on first card
-    fireEvent.click(leftButton); // Swipe left on second card
+
+    // Swipe left twice to reject all cards
+    fireEvent.click(leftButton);
+    fireEvent.click(leftButton);
 
     await waitFor(() => {
       expect(push).toHaveBeenCalled();
-      // The query string should include a single id
+      // Preference query includes one id only
       expect(push.mock.calls[0][0]).toMatch(/preference=(1|2)/);
     });
   });
-});
-
-afterEach(() => {
-  jest.clearAllMocks();
 });
