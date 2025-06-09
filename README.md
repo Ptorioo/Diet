@@ -91,7 +91,7 @@ NEXT_PUBLIC_APP_API_URL=
 
 ---
 
-## 👥 Contributors
+## 主要貢獻者
 
 - **B11705030 嚴邦華**
 - **B11705060 盧沛宏**
